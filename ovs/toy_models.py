@@ -1,4 +1,4 @@
-from numpy import np
+import numpy as np
 
 def guassian_bandit_sequence(start, end, step=1):
     '''
@@ -64,13 +64,10 @@ class GaussianBandit(object):
         self._total_reward = 0
         self._observers = []
 
-    def play(self, replications):
+    def play(self):
         '''
         Pull the arm on the bernoulli bandit
 
-        Parameters:
-        ---------
-        replications - int, number of replications to return
 
         Returns:
         -----
@@ -93,17 +90,6 @@ class GaussianBandit(object):
         self._total_reward = 0
 
 
-class StandardRankingSelectionProblem(object):
-    def __init__(self, designs, random_state=None):
-        self._designs = designs
-        self._env = BanditCasino(guassian_bandit_sequence(1, designs))
-        
-        if random_state is not None:
-            np.random.seed(random_state)
-
-    def simulate(designs, replications):
-        for bandit in self._bandits[designs]:
-            bandit.play(replications)
 
 
 class BanditCasino(object):
