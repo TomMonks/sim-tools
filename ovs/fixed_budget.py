@@ -1,159 +1,124 @@
 '''
-Contains algorithms for Optimisation via Simulation
-with a fixed budget (fixed total number of replications)
+
+Fixed budget alpirhtms
 
 1. OCBA - optimal computing budget allocation
 2. OCBA-m - optimal computering budget allocation top m.
-3. KN - KN (Kim-Nelson) sequential Ranking and Selection Algorithm
 
 '''
 
 import numpy as np
 
-from toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+def ocba_m(dataset, k, allocations, T, delta, m):
+    
+    while allocations.sum() < T:
+        
+        #simulate systems using new allocation of budget
+        reps = simulate(dataset, k, allocations) 
+        
+        #calculate sample means and standard errors
+        means, ses = summary_statistics(reps, allocations)
+        
+        #calculate parameter c and deltas
+        c = parameter_c(means, ses, k, m)
+        deltas = means - c
+        
+        #allocate
+        for i in range(delta):
+            values = np.divide(allocations, np.square(np.divide(ses, deltas)))
+            ranks = get_ranks(values)
+            allocations[ranks.argmin()] += 1
+            
+    return means, ses, allocations
 
-class KN(object):
-    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
+
+def get_ranks(array):
+    """
+    Returns a numpy array containing ranks of numbers within a input numpy array
+    e.g. [3, 2, 1] returns [2, 1, 0]
+    e.g. [3, 2, 1, 4] return [2, 1, 0, 3]
+        
+    Parameters:
+    --------
+    array - np.ndarray, numpy array (only tested with 1d)
+
+    Returns:
+    ---------
+    np.ndarray, ranks
+        
+    """
+    temp = array.argsort()
+    ranks = np.empty_like(temp)
+    ranks[temp] = np.arange(len(array))
+    return ranks
+
+
+class OCBA(object):
+    def __init__(self, model, n_designs, budget, delta, n_0=5):
         '''
-        Constructor method for KN  Ranking and Selection Procedure.
-
-        This works well for up to 20 competing designs
+        Constructor method for Optimal Budget Computer Allocation
 
         Parameters:
-        ----------
+        ---------
 
         model - object, simulation model that implements 
         method simulate(design, replications)
 
-        n_designs - int, the number of designs (k)
+        n_designs - int, (k) the number of competing system designs 
 
-        delta - float, the indifference zone
+        budget - int, (T) the total simulation budget available i.e. the 
+        total number of replications available to allocate between systems
 
-        alpha - float, between 0 and 1.  Used to calculate the 1-alpha 
-        probability of correct selection
+        delta - int, incremental budget to allocate.  Recommendation is
+        > 5 and smaller than 10 percent of budget.  When simulation is expensive
+        then this number could be set to 1.
 
-        n_0 - int, the number of initial observations (default = 2)
+        n_0 - int, the total number of initial replications.  Minimum allowed is 5
+        (default=5)
 
         '''
+        if n_0 < 5:
+            raise ValueError('n_0 must be >= 5')
+
+        if (budget - (n_designs * n_0)) % delta != 0:
+            raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
 
         model.register_observer(self)
         self._env = model
-        #self._total_rounds = budget
-        self._total_reward = 0
-        self._current_round = 0
+        self._k = n_designs
+        self._T  = budget
+        self._delta = delta
+        self._n_0 = n_0
+
         self._actions = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
         self._init_obs = np.zeros((n_designs, n_0), np.float64)
-        
-        self._k = n_designs
-        self._contenders = np.arange(self._k)
-        self._delta = delta
-        self._alpha = alpha
-        self._n_0 = n_0
-        self._r = 0
 
-        self._eta = 0.5 * (np.power((2 * alpha) / (self._k - 1), -2/(self._n_0-1)) - 1)
-    
+        #used when calculating running standard deviation across designs
+        self._mu = np.zeros(n_designs, np.float64)
+        self._sq = np.zeros(n_designs, np.float64)
+
+
     def solve(self):
-        self._initialisation()
+        l = 0
+        self._initialise()
 
-        while not self._stopping():
-            self._screening()
-            self._sequential_replication()
+        while self._actions.sum() < T:
+            pass
 
-        return self._contenders
-
-    def _initialisation(self):  
-        '''
-        Initialise KN
-        
-        Estimate initial sample means and variances of the differences
-
-        '''      
-        self._h_squared = 2 * self._eta * (self._n_0 - 1)
-        
-        for observation in range(self._n_0):
-            self._sequential_replication()
-                
-        self._variance_of_diffs = self._calc_variance_of_differences()
+    
+    def _initialise(self):
+        for design in range(self.k):
+            for replication in self._n0:
+                self._env.action(design)
 
 
-    def _sequential_replication(self):
-        for design in self._contenders:
+    def _sequential_replication(self, systems):
+        for design in systems:
             self._env.action(design)
         
-        self._r += 1
-        print(self._r)
-
-
-    def _calc_variance_of_differences(self):
-        pairwise_diffs = self._init_obs[:, None] - self._init_obs
-        variance_of_diffs = pairwise_diffs.var(axis=-1, ddof=1)
-        #flattens array and drops differences with same design
-        return variance_of_diffs[~np.eye(variance_of_diffs.shape[0],dtype=bool)]
-
-    def _screening(self):
-        self._contenders_old = np.asarray(self._contenders).copy()
-        contenders_mask = np.full(self._contenders.shape, True, dtype=bool)
-        #terrible way to code this...!
-
-        #designs in contention for this round
-        for i in range(len(self._contenders_old)):
-            for l in range(len(self._contenders_old)):
-                if i != l:
-                    design_i, design_l = self._contenders_old[i], self._contenders_old[l]
-                    if not self._design_still_in_contention(i, l):
-                        contenders_mask[i] = False
-                        break
-                
-
-        self._contenders = self._contenders[contenders_mask]
-
-
-    def _design_still_in_contention(self, design_i, design_l):
-        w_il = self._limit_to_distance_from_sample_means(design_i, design_l)
-
-        mean_i = self._means[design_i]
-        mean_l = self._means[design_l]
-
-        return mean_i >= mean_l - w_il
-
-    def _limit_to_distance_from_sample_means(self, design_i, design_l):
-        '''
-        calculates W_li(r), 
-        which determines how far the sample mean from system i can 
-        drop below the sample means of system l without being eliminated
-        '''
-        index = design_i * (self._k - 1) + (design_l - 1)
-
-        w_il = (self._delta / (2 * self._r)) \
-            * (((self._h_squared * self._variance_of_diffs[index]) / self._delta**2) - self._r)
-        
-
-        self
-
-        return w_il
-
-    def _stopping(self):
-        '''
-        If |I| = 1 then stop (and select the system whose index is in I)
-        else take one further sample from each system
-
-        '''
-        if len(self._contenders) == 1:
-            return True
-        
-        return False
-
-
-
-    def update(self):
-        pass
-
-
-
     def feedback(self, *args, **kwargs):
-        '''
+            '''
         Feedback from the environment
         Recieves a reward and updates understanding
         of an arm
@@ -172,19 +137,16 @@ class KN(object):
         design_index = args[1]
         reward = args[2]
         self._actions[design_index] +=1 #+= number of replicaions
+        mu = self._mu[design_index]
         self._means[design_index] = self.updated_mean_estimate(design_index, reward)
-        if self._r < self._n_0:
-            self._init_obs[design_index][self._r] = reward
-        #calculate running standard deviation.
         
+        #probably should check what is happening here...
+        mu_new = mu + (reward - mu) / self._actions[design_index]
+        self._sq[design_index] += (reward - mu) * (reward - mu_new)
+        mu = muNew
+        #if self._r < self._n_0:
+        #    self._init_obs[design_index][self._r] = reward
 
-        #UCB specific to remove...
-        #first run through divides by zero.  In numpy this operation yields inf.
-        #the with np.errstate() call/context avoid warning user of the operation 
-        #with np.errstate(divide='ignore', invalid='ignore'):
-        #    deltas = np.sqrt(3/2 * (np.log(self._current_round + 1) / self._actions))
-        
-        #self._upper_bounds = self._means + deltas
         
 
     def updated_mean_estimate(self, design_index, reward):
@@ -205,131 +167,3 @@ class KN(object):
         new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
         return new_value 
 
-
-
-
-
-class UpperConfidenceBound(object):
-    
-    def __init__(self, budget, environment):
-        '''
-        Constructor method
-        '''
-        environment.register_observer(self)
-        self._validate_budget(budget)
-        self._env = environment
-        self._total_rounds = budget
-        self._total_reward = 0
-        self._current_round = 0
-        self._actions = np.zeros(environment.number_of_arms, np.int32)
-        self._means = np.zeros(environment.number_of_arms, np.float64)
-        self._upper_bounds = np.zeros(environment.number_of_arms, np.float64)
-    
-        
-    def _validate_budget(self, budget):
-        if budget < 0:
-            msg = 'budget argument must be a int > 0'
-            raise ValueError(msg)
-            
-    def reset(self):
-        self._total_reward = 0
-        self._current_round = 0
-        self._actions = np.zeros(self._env.number_of_arms, np.int32)
-        self._means = np.zeros(self._env.number_of_arms, np.float64)
-        self._upper_bounds = np.zeros(self._env.number_of_arms, np.float64)
-
-    def _get_total_reward(self):
-        return self._total_reward
-
-    def _get_action_history(self):
-        return self._actions
-    
-    def _get_best_arm(self):
-        '''
-        Return the index of the arm 
-        with the highest expected value
-
-        Returns:
-        ------
-        int, Index of the best arm
-        '''
-        return np.argmax(self._means)
-    
-    def solve(self):
-        '''
-        Run the epsilon greedy algorithm in the 
-        environment to find the best arm 
-        '''
-        for i in range(self._total_rounds):
-            
-            max_upper_bound_index = np.argmax(self._upper_bounds)
-            self._env.action(max_upper_bound_index)            
-            
-            self._current_round += 1
-    
-        
-    
-    def feedback(self, *args, **kwargs):
-        '''
-        Feedback from the environment
-        Recieves a reward and updates understanding
-        of an arm
-
-        Keyword arguments:
-        ------
-        *args -- list of argument
-                 0  sender object
-                 1. arm index to update
-                 2. reward
-
-        *kwards -- dict of keyword arguments:
-                   None expected!
-
-        '''
-        arm_index = args[1]
-        reward = args[2]
-        self._total_reward += reward
-        self._actions[arm_index] +=1
-        self._means[arm_index] = self.updated_reward_estimate(arm_index, reward)
-        
-        #first run through divides by zero.  In numpy this operation yields inf.
-        #the with np.errstate() call/context avoid warning user of the operation 
-        with np.errstate(divide='ignore', invalid='ignore'):
-            deltas = np.sqrt(3/2 * (np.log(self._current_round + 1) / self._actions))
-        
-        self._upper_bounds = self._means + deltas
-        
-
-    def updated_reward_estimate(self, arm_index, reward):
-        '''
-        Calculate the new running average of the arm
-
-        Keyword arguments:
-        ------
-        arm_index -- int, index of the array to update
-        reward -- float, reward recieved from the last action
-
-        Returns:
-        ------
-        float, the new mean estimate for the selected arm
-        '''
-        n = self._actions[arm_index]
-        current_value = self._means[arm_index]
-        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
-        return new_value
-
-    total_reward = property(_get_total_reward)
-    actions = property(_get_action_history)
-    best_arm = property(_get_best_arm)
-
-
-if __name__ == '__main__':
-    designs = guassian_bandit_sequence(1, 11)
-    print(len(designs))
-    environment = BanditCasino(designs)
-
-    kn = KN(environment, len(designs), 
-            delta=0.05, alpha=0.05, n_0=5)
-
-    results = kn.solve()
-    print(results)
