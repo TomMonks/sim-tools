@@ -54,6 +54,16 @@ def get_ranks(array):
 
 
 class OCBA(object):
+    '''
+    Optimal Computer Budget Allocation (OCBA)
+
+    Given a total replication budget T allocate
+    replications across designs in order to maximise the 
+    probability of correct selections.
+
+    Assumes each system design has similar run time.
+
+    '''
     def __init__(self, model, n_designs, budget, delta, n_0=5):
         '''
         Constructor method for Optimal Budget Computer Allocation
@@ -62,7 +72,7 @@ class OCBA(object):
         ---------
 
         model - object, simulation model that implements 
-        method simulate(design, replications)
+        method action(design)
 
         n_designs - int, (k) the number of competing system designs 
 
@@ -95,28 +105,42 @@ class OCBA(object):
         self._init_obs = np.zeros((n_designs, n_0), np.float64)
 
         #used when calculating running standard deviation across designs
-        self._mu = np.zeros(n_designs, np.float64)
+        #sum of squares
         self._sq = np.zeros(n_designs, np.float64)
 
 
     def solve(self):
+        '''
+        run the ranking and selection procedure
+        Vanilla OCBA
+        '''
         l = 0
         self._initialise()
 
         while self._actions.sum() < T:
-            pass
+            ranks = get_ranks(self._means)
+            best_index, s_best_index = np.argpartition(ranks, -2)[-2:]
 
-    
+            self._allocate()
+
+
     def _initialise(self):
+        '''
+        For each design run n_0 initial replications
+        '''
         for design in range(self.k):
             for replication in self._n0:
                 self._env.action(design)
 
+    
+    def _allocate(self):
+        '''
+        Allocate the incremental budget across 
+        designs
+        '''
+        pass
 
-    def _sequential_replication(self, systems):
-        for design in systems:
-            self._env.action(design)
-        
+
     def feedback(self, *args, **kwargs):
             '''
         Feedback from the environment
@@ -130,8 +154,7 @@ class OCBA(object):
                  1. arm index to update
                  2. reward
 
-        *kwards -- dict of keyword arguments:
-                   None expected!
+        *kwargs -- dict of keyword arguments
 
         '''
         design_index = args[1]
@@ -144,9 +167,6 @@ class OCBA(object):
         mu_new = mu + (reward - mu) / self._actions[design_index]
         self._sq[design_index] += (reward - mu) * (reward - mu_new)
         mu = muNew
-        #if self._r < self._n_0:
-        #    self._init_obs[design_index][self._r] = reward
-
         
 
     def updated_mean_estimate(self, design_index, reward):
