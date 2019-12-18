@@ -9,6 +9,8 @@ Fixed budget alpirhtms
 
 import numpy as np
 
+from toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+
 def ocba_m(dataset, k, allocations, T, delta, m):
     
     while allocations.sum() < T:
@@ -64,7 +66,7 @@ class OCBA(object):
     Assumes each system design has similar run time.
 
     '''
-    def __init__(self, model, n_designs, budget, delta, n_0=5):
+    def __init__(self, model, n_designs, budget, delta, n_0=5, max=True):
         '''
         Constructor method for Optimal Budget Computer Allocation
 
@@ -72,7 +74,7 @@ class OCBA(object):
         ---------
 
         model - object, simulation model that implements 
-        method action(design)
+        interface action(design)
 
         n_designs - int, (k) the number of competing system designs 
 
@@ -100,36 +102,43 @@ class OCBA(object):
         self._delta = delta
         self._n_0 = n_0
 
-        self._actions = np.zeros(n_designs, np.int32)
+        self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
-        self._init_obs = np.zeros((n_designs, n_0), np.float64)
+        self._vars = np.zeros(n_designs, np.float64)
+        self._ratios = np.zeros(n_designs, np.float64)
 
         #used when calculating running standard deviation across designs
         #sum of squares
         self._sq = np.zeros(n_designs, np.float64)
 
+        if max:
+            self._negate = -1.0
+        else:
+            self._negage = 1.0
 
     def solve(self):
         '''
         run the ranking and selection procedure
-        Vanilla OCBA
+        Vanilla OCBA 
         '''
-        l = 0
         self._initialise()
 
-        while self._actions.sum() < T:
-            ranks = get_ranks(self._means)
-            best_index, s_best_index = np.argpartition(ranks, -2)[-2:]
+        while self._allocations.sum() < self._T:
+            new_allocations = self._allocate()
+            
+            for design in range(self._k):
+                for replication in new_allocations[design]:
+                    self._env.action(design)
 
-            self._allocate()
+        return np.argmax(self._means)
 
 
     def _initialise(self):
         '''
         For each design run n_0 initial replications
         '''
-        for design in range(self.k):
-            for replication in self._n0:
+        for design in range(self._k):
+            for replication in range(self._n_0):
                 self._env.action(design)
 
     
@@ -138,16 +147,60 @@ class OCBA(object):
         Allocate the incremental budget across 
         designs
         '''
-        pass
+        #total allocated + delta
+        total_allocated = self._allocations.sum() + self._delta
+
+        #get indicies of best and second best designs so far
+        ranks = get_ranks(self._means) 
+        best_index, s_best_index = np.argpartition(ranks, -2)[-2:]
+
+        self._ratios[s_best_index] = 1.0
+
+        #Part 1: Ratio N_i / N_s
+        #all 'select' does is exclude best and second best from arraywise calcs
+        select = [i for i in range(self._k) if i not in [best_index, s_best_index]]
+        temp = self._means[best_index] - self._means[s_best_index] \
+                / self._means[best_index] - self._means[select]
+        self._ratios[select] = np.square(temp) * self._vars[select] / self._vars[s_best_index]
+
+        #Part 2: N_b
+        #exclude best
+        select = [i for i in range(self._k) if i not in [best_index]]
+        temp = (np.square(self._ratios[select]) / self._vars[select]).sum()
+        self._ratios[best_index] = np.sqrt(self._vars[best_index] * temp)
+
+        #got all of the ratios now...
+        more_runs = np.full(self._k, 1, dtype=np.int8)
+
+        more_alloc = True
+        #additional_runs = np.fill(self._k, 1, dytpe=np.int16)
+
+        while(more_alloc):
+            ratio_s = (more_runs * self._ratios).sum()
+            additional_runs = (total_allocated / (ratio_s * self._ratios)).astype(int)
+
+            mask = additional_runs < self._allocations
+            additional_runs[mask] = self._allocations[mask]
+            more_runs[mask] = 0  # not sure I need this...
+            if mask.sum() > 0: more_alloc = True
+
+            if more_alloc:
+                budget_remaining = total_allocated ## ?
+                total_allocated -= (additional_runs * more_runs).sum()
+
+        total_additional = additional_runs.sum()
+        additional_runs[best_index] = total_allocated - total_additional
+
+        return additional_runs - self._allocated
 
 
     def feedback(self, *args, **kwargs):
-            '''
+        '''
         Feedback from the environment
         Recieves a reward and updates understanding
         of an arm
 
-        Keyword arguments:
+        Parameters:
         ------
         *args -- list of argument
                  0  sender object
@@ -159,21 +212,21 @@ class OCBA(object):
         '''
         design_index = args[1]
         reward = args[2]
-        self._actions[design_index] +=1 #+= number of replicaions
-        mu = self._mu[design_index]
+        self._allocations[design_index] +=1 #+= number of replicaions
+        mu = self._means[design_index]
         self._means[design_index] = self.updated_mean_estimate(design_index, reward)
         
-        #probably should check what is happening here...
-        mu_new = mu + (reward - mu) / self._actions[design_index]
+        #running standard deviation
+        mu_new = mu + (reward - mu) / self._allocations[design_index]
         self._sq[design_index] += (reward - mu) * (reward - mu_new)
-        mu = muNew
+        #mu = muNew
         
 
     def updated_mean_estimate(self, design_index, reward):
         '''
         Calculate the new running average of the design
 
-        Keyword arguments:
+        Parameters:
         ------
         design_index -- int, index of the array to update
         reward -- float, reward recieved from the last action
@@ -182,8 +235,19 @@ class OCBA(object):
         ------
         float, the new mean estimate for the selected arm
         '''
-        n = self._actions[design_index]
+        n = self._allocations[design_index]
         current_value = self._means[design_index]
         new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
         return new_value 
 
+
+
+if __name__ == '__main__':
+    designs = guassian_bandit_sequence(1, 11)
+    
+    environment = BanditCasino(designs)
+
+    ocba = OCBA(environment, len(designs), 500, 10)
+
+    results = ocba.solve()
+    print(results)
