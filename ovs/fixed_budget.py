@@ -103,6 +103,8 @@ class OCBA(object):
         self._T  = budget
         self._delta = delta
         self._n_0 = n_0
+        #temp
+        self._obs = []
 
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
@@ -116,7 +118,7 @@ class OCBA(object):
         if min:
             self._negate = 1.0
         else:
-            self._negage = -1.0
+            self._negate = -1.0
 
     def solve(self):
         '''
@@ -152,7 +154,7 @@ class OCBA(object):
         designs
         '''
         #total allocated + delta
-        total_allocated = self._allocations.sum() + self._delta
+        budget_to_allocate = self._allocations.sum() + self._delta
 
         #get indicies of best and second best designs so far
         #note treated as minimisation problem.  Means are negated if maximisation
@@ -164,9 +166,10 @@ class OCBA(object):
         #Part 1: Ratio N_i / N_s
         #all 'select' does is exclude best and second best from arraywise calcs
         select = [i for i in range(self._k) if i not in [best_index, s_best_index]]
-        temp = self._means[best_index] - self._means[s_best_index] \
-                / self._means[best_index] - self._means[select]
-        self._ratios[select] = np.square(temp) * self._vars[select] / self._vars[s_best_index]
+
+        temp = (self._means[best_index] - self._means[s_best_index]) / (self._means[best_index] - self._means[select])
+
+        self._ratios[select] = (np.square(temp) * self._vars[select]) / self._vars[s_best_index]
 
         #Part 2: N_b
         #exclude best
@@ -175,26 +178,29 @@ class OCBA(object):
         self._ratios[best_index] = np.sqrt(self._vars[best_index] * temp)
 
         #got all of the ratios now...
-        more_runs = np.full(self._k, 1, dtype=np.int8)
-
+        more_runs = np.full(self._k, True, dtype=bool)
+        additional_runs = np.zeros(self._k, dtype=np.float)
         more_alloc = True
         #additional_runs = np.fill(self._k, 1, dytpe=np.int16)
 
         while(more_alloc):
+            more_alloc = False
             ratio_s = (more_runs * self._ratios).sum()
-            additional_runs = (total_allocated / (ratio_s * self._ratios)).astype(int)
-
+            additional_runs[more_runs] = (budget_to_allocate / (ratio_s * self._ratios[more_runs]))
+            additional_runs = additional_runs.astype(int)
             mask = additional_runs < self._allocations
             additional_runs[mask] = self._allocations[mask]
-            more_runs[mask] = 0  # not sure I need this...
-            if mask.sum() > 0: more_alloc = True
+
+            #disable designs where new allocation is less than has already been run.
+            more_runs[mask] = 0  # not sure I need this..???.
+            if more_runs.sum() > 0: more_alloc = True
 
             if more_alloc:
-                budget_remaining = total_allocated ## ?
-                total_allocated -= (additional_runs * more_runs).sum()
+                budget_remaining = budget_to_allocate ## not sure i need this
+                budget_to_allocate -= (additional_runs * more_runs).sum()
 
         total_additional = additional_runs.sum()
-        additional_runs[best_index] = total_allocated - total_additional
+        additional_runs[best_index] = budget_to_allocate - total_additional
 
         return additional_runs - self._allocations
 
@@ -239,8 +245,10 @@ class OCBA(object):
         new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation * self._negate
 
         if n > 1:
-            self._sq[design_index] += (observation - current_mean) * (observation - new_mean)
+
+            self._sq[design_index] += (observation - abs(current_mean)) * (observation - abs(new_mean))
             self._vars[design_index] = self._sq[design_index] / (n - 1)
+
 
         self._means[design_index] = new_mean
 
@@ -252,7 +260,7 @@ if __name__ == '__main__':
     
     environment = BanditCasino(designs)
 
-    ocba = OCBA(environment, len(designs), 500, 10)
+    ocba = OCBA(environment, len(designs), 1000, 10, n_0=10, min=True)
 
     results = ocba.solve()
     print(results)
