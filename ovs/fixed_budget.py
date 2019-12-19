@@ -9,7 +9,6 @@ Fixed budget alpirhtms
 
 import numpy as np
 
-
 def ocba_m(dataset, k, allocations, T, delta, m):
     
     while allocations.sum() < T:
@@ -102,8 +101,6 @@ class OCBA(object):
         self._T  = budget
         self._delta = delta
         self._n_0 = n_0
-        #temp
-        self._obs = []
 
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
@@ -118,6 +115,15 @@ class OCBA(object):
             self._negate = 1.0
         else:
             self._negate = -1.0
+
+    def reset(self):
+        self._total_reward = 0
+        self._current_round = 0
+        self._allocations = np.zeros(self._k, np.int32)
+        self._means = np.zeros(self._k, np.float64)
+        self._vars = np.zeros(self._k, np.float64)
+        self._ratios = np.zeros(self._k, np.float64)
+        self._sq = np.zeros(self._k, np.float64)
 
     def solve(self):
         '''

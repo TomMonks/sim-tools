@@ -53,6 +53,15 @@ class KN(object):
         self._r = 0
 
         self._eta = 0.5 * (np.power((2 * alpha) / (self._k - 1), -2/(self._n_0-1)) - 1)
+
+    def reset(self):
+        self._total_reward = 0
+        self._current_round = 0
+        self._actions = np.zeros(self._k, np.int32)
+        self._means = np.zeros(self._k, np.float64)
+        self._actions = np.zeros(self._k, np.int32)
+        self._init_obs = np.zeros((self._k, self._n_0), np.float64)
+        self._contenders = np.arange(self._k)
     
     def solve(self):
         self._initialisation()
@@ -129,9 +138,6 @@ class KN(object):
         w_il = (self._delta / (2 * self._r)) \
             * (((self._h_squared * self._variance_of_diffs[index]) / self._delta**2) - self._r)
         
-
-        self
-
         return w_il
 
     def _stopping(self):
@@ -144,13 +150,6 @@ class KN(object):
             return True
         
         return False
-
-
-
-    def update(self):
-        pass
-
-
 
     def feedback(self, *args, **kwargs):
         '''
@@ -186,7 +185,6 @@ class KN(object):
         
         #self._upper_bounds = self._means + deltas
         
-
     def updated_mean_estimate(self, design_index, reward):
         '''
         Calculate the new running average of the design
