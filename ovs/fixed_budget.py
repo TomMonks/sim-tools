@@ -130,7 +130,9 @@ class OCBA(object):
                 for replication in new_allocations[design]:
                     self._env.action(design)
 
-        return np.argmax(self._means)
+        best = np.argmin(self._means)
+        self._means *= self._negate
+        return best
 
 
     def _initialise(self):
@@ -151,8 +153,9 @@ class OCBA(object):
         total_allocated = self._allocations.sum() + self._delta
 
         #get indicies of best and second best designs so far
+        #note treated as minimisation problem.  Means are negated if maximisation
         ranks = get_ranks(self._means) 
-        best_index, s_best_index = np.argpartition(ranks, -2)[-2:]
+        best_index, s_best_index = np.argpartition(ranks, 2)[:2]
 
         self._ratios[s_best_index] = 1.0
 
@@ -237,7 +240,7 @@ class OCBA(object):
         '''
         n = self._allocations[design_index]
         current_value = self._means[design_index]
-        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
+        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward * self._negate
         return new_value 
 
 
