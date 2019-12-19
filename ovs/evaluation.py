@@ -99,7 +99,6 @@ class GridExperiment(object):
         for index in range(len(self._param_grid)):
             for key in self._param_grid[index].keys():
                 #set the agents attribute
-               print('means\t\t{0}'.format(kn._means)) 
                setattr(self._agent, key, self._param_grid[index][key])
 
                df_results.loc[index][key] = self._param_grid[index][key]
