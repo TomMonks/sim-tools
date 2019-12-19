@@ -9,7 +9,7 @@ Fixed budget alpirhtms
 
 import numpy as np
 
-from toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
 
 def ocba_m(dataset, k, allocations, T, delta, m):
     
@@ -92,10 +92,10 @@ class OCBA(object):
 
         '''
         if n_0 < 5:
-            raise ValueError('n_0 must be >= 5')
+            pass #raise ValueError('n_0 must be >= 5')
 
         if (budget - (n_designs * n_0)) % delta != 0:
-            raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
+            pass#raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
 
         model.register_observer(self)
         self._env = model
@@ -181,7 +181,7 @@ class OCBA(object):
         more_runs = np.full(self._k, True, dtype=bool)
         additional_runs = np.zeros(self._k, dtype=np.float)
         more_alloc = True
-        #additional_runs = np.fill(self._k, 1, dytpe=np.int16)
+        
 
         while(more_alloc):
             more_alloc = False

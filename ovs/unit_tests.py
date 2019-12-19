@@ -158,5 +158,29 @@ def test_ocba_update_var_multiple_random():
     assert np.allclose(actual_var, results)
 
 
+def test_ocba_allocate():
+    designs = guassian_bandit_sequence(1, 5)
+    environment = BanditCasino(designs)
+
+    optimiser = OCBA(model=environment,
+                     n_designs=4,
+                     budget=400,
+                     delta=100,
+                     min=True,
+                     n_0=4)
+
+    optimiser._means = np.array([1.2, 3.4, 4.87, 6.05])
+    optimiser._var = np.array([3.3, 2.0, 4.5, 5.3, 6.9])
+    optimiser._allocations = np.array([12, 6, 5, 5, 4])
+    
+    actual_allocations = optimiser._allocate()
+    expected_allocations = np.array([48, 38, 11, 2, 1])
+
+    print(actual_allocations)
+    print(expected_allocations)
+
+    assert np.allclose(actual_allocations, expected_allocations)
+
+
     
     
