@@ -66,7 +66,7 @@ class OCBA(object):
     Assumes each system design has similar run time.
 
     '''
-    def __init__(self, model, n_designs, budget, delta, n_0=5, max=True):
+    def __init__(self, model, n_designs, budget, delta, n_0=5, min=True):
         '''
         Constructor method for Optimal Budget Computer Allocation
 
@@ -87,6 +87,8 @@ class OCBA(object):
 
         n_0 - int, the total number of initial replications.  Minimum allowed is 5
         (default=5)
+
+        min - bool, True if minimisation; False if maximisation.  (default=True)
 
         '''
         if n_0 < 5:
@@ -111,10 +113,10 @@ class OCBA(object):
         #sum of squares
         self._sq = np.zeros(n_designs, np.float64)
 
-        if max:
-            self._negate = -1.0
+        if min:
+            self._negate = 1.0
         else:
-            self._negage = 1.0
+            self._negage = -1.0
 
     def solve(self):
         '''
@@ -194,7 +196,7 @@ class OCBA(object):
         total_additional = additional_runs.sum()
         additional_runs[best_index] = total_allocated - total_additional
 
-        return additional_runs - self._allocated
+        return additional_runs - self._allocations
 
 
     def feedback(self, *args, **kwargs):
@@ -208,40 +210,40 @@ class OCBA(object):
         *args -- list of argument
                  0  sender object
                  1. arm index to update
-                 2. reward
+                 2. observation
 
         *kwargs -- dict of keyword arguments
 
         '''
         design_index = args[1]
-        reward = args[2]
-        self._allocations[design_index] +=1 #+= number of replicaions
-        mu = self._means[design_index]
-        self._means[design_index] = self.updated_mean_estimate(design_index, reward)
-        
-        #running standard deviation
-        mu_new = mu + (reward - mu) / self._allocations[design_index]
-        self._sq[design_index] += (reward - mu) * (reward - mu_new)
-        #mu = muNew
+        observation = args[2]
+        self._allocations[design_index] +=1 
+                
+        #update running mean and standard deviation
+        self._update_moments(design_index, observation)
         
 
-    def updated_mean_estimate(self, design_index, reward):
+        
+    def _update_moments(self, design_index, observation):
         '''
-        Calculate the new running average of the design
+        Updates the running average, var of the design
 
         Parameters:
         ------
         design_index -- int, index of the array to update
-        reward -- float, reward recieved from the last action
 
-        Returns:
-        ------
-        float, the new mean estimate for the selected arm
+        observation -- float, observation recieved from the last replication
         '''
         n = self._allocations[design_index]
-        current_value = self._means[design_index]
-        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward * self._negate
-        return new_value 
+        current_mean = self._means[design_index]
+        new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation * self._negate
+
+        if n > 1:
+            self._sq[design_index] += (observation - current_mean) * (observation - new_mean)
+            self._vars[design_index] = self._sq[design_index] / (n - 1)
+
+        self._means[design_index] = new_mean
+
 
 
 
