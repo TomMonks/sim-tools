@@ -9,7 +9,7 @@ Fixed budget alpirhtms
 
 import numpy as np
 
-from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+from toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
 
 def ocba_m(dataset, k, allocations, T, delta, m):
     
@@ -131,7 +131,7 @@ class OCBA(object):
             new_allocations = self._allocate()
             
             for design in range(self._k):
-                for replication in new_allocations[design]:
+                for replication in range(new_allocations[design]):
                     self._env.action(design)
 
         best = np.argmin(self._means)
@@ -167,9 +167,10 @@ class OCBA(object):
         #all 'select' does is exclude best and second best from arraywise calcs
         select = [i for i in range(self._k) if i not in [best_index, s_best_index]]
 
-        temp = (self._means[best_index] - self._means[s_best_index]) / (self._means[best_index] - self._means[select])
+        temp = (self._means[best_index] - self._means[s_best_index]) \
+            / (self._means[best_index] - self._means[select])
 
-        self._ratios[select] = (np.square(temp) * self._vars[select]) / self._vars[s_best_index]
+        self._ratios[select] = np.square(temp) * (self._vars[select] / self._vars[s_best_index])
 
         #Part 2: N_b
         #exclude best
@@ -182,25 +183,25 @@ class OCBA(object):
         additional_runs = np.zeros(self._k, dtype=np.float)
         more_alloc = True
         
-
         while(more_alloc):
             more_alloc = False
             ratio_s = (more_runs * self._ratios).sum()
-            additional_runs[more_runs] = (budget_to_allocate / (ratio_s * self._ratios[more_runs]))
+            additional_runs[more_runs] = (budget_to_allocate / ratio_s * self._ratios[more_runs])
             additional_runs = additional_runs.astype(int)
             mask = additional_runs < self._allocations
             additional_runs[mask] = self._allocations[mask]
 
             #disable designs where new allocation is less than has already been run.
             more_runs[mask] = 0  # not sure I need this..???.
-            if more_runs.sum() > 0: more_alloc = True
+            if mask.sum() > 0: more_alloc = True
 
             if more_alloc:
                 budget_remaining = budget_to_allocate ## not sure i need this
-                budget_to_allocate -= (additional_runs * more_runs).sum()
+
+                budget_to_allocate -= (additional_runs * ~more_runs).sum()
 
         total_additional = additional_runs.sum()
-        additional_runs[best_index] = budget_to_allocate - total_additional
+        additional_runs[best_index] += self._allocations.sum() + self._delta - total_additional
 
         return additional_runs - self._allocations
 
@@ -253,14 +254,19 @@ class OCBA(object):
         self._means[design_index] = new_mean
 
 
-
-
 if __name__ == '__main__':
     designs = guassian_bandit_sequence(1, 11)
     
     environment = BanditCasino(designs)
 
-    ocba = OCBA(environment, len(designs), 1000, 10, n_0=10, min=True)
+    ocba = OCBA(environment, len(designs), 300, 10, n_0=10, min=False)
 
     results = ocba.solve()
-    print(results)
+    print('best design:\t{}'.format(results))
+    print('allocations:\t{}'.format(ocba._allocations))
+    print('total reps:\t{}'.format(ocba._allocations.sum()))
+
+    np.set_printoptions(precision=2)
+    print('means:\t\t{0}'.format(ocba._means))
+    print('vars:\t\t{0}'.format(ocba._vars))
+    

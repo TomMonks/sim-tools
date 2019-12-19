@@ -163,14 +163,14 @@ def test_ocba_allocate():
     environment = BanditCasino(designs)
 
     optimiser = OCBA(model=environment,
-                     n_designs=4,
+                     n_designs=5,
                      budget=400,
                      delta=100,
                      min=True,
                      n_0=4)
 
-    optimiser._means = np.array([1.2, 3.4, 4.87, 6.05])
-    optimiser._var = np.array([3.3, 2.0, 4.5, 5.3, 6.9])
+    optimiser._means = np.array([1.2, 2.1, 3.4, 4.87, 6.05])
+    optimiser._vars = np.array([3.3, 2.0, 4.5, 5.3, 6.9])
     optimiser._allocations = np.array([12, 6, 5, 5, 4])
     
     actual_allocations = optimiser._allocate()
