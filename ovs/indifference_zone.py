@@ -10,7 +10,7 @@ with a fixed budget (fixed total number of replications)
 
 import numpy as np
 
-from toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
 
 class KN(object):
     def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
@@ -83,7 +83,7 @@ class KN(object):
             self._env.action(design)
         
         self._r += 1
-        print(self._r)
+        #print(self._r)
 
 
     def _calc_variance_of_differences(self):
