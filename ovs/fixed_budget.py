@@ -33,6 +33,179 @@ def ocba_m(dataset, k, allocations, T, delta, m):
     return means, ses, allocations
 
 
+class OCBAM(object):
+    '''
+    Optimal Computer Budget Allocation Top M (OCBA-m)
+
+    Given a total replication budget T allocate
+    replications across designs in order to maximise the 
+    approximate probability of correctly selecting the best m designs
+
+    Assumes each system design has similar run time.
+
+    Algorithm described in:
+    -------------------------
+    
+
+    '''
+    def __init__(self, model, n_designs, budget, delta, n_0=5, m=2, min=True):
+        '''
+        Constructor method for Optimal Budget Computer Allocation Top M
+
+        Parameters:
+        ---------
+
+        model - object, simulation model that implements 
+        interface action(design)
+
+        n_designs - int, (k) the number of competing system designs 
+
+        budget - int, (T) the total simulation budget available i.e. the 
+        total number of replications available to allocate between systems
+
+        delta - int, incremental budget to allocate.  Recommendation is
+        > 5 and smaller than 10 percent of budget.  When simulation is expensive
+        then this number could be set to 1.
+
+        n_0 - int, the total number of initial replications.  Minimum allowed is 5
+        (default=5)
+
+        m - int, the best m designs
+
+        min - bool, True if minimisation; False if maximisation.  (default=True)
+
+        '''
+        model.register_observer(self)
+        self._env = model
+        self._k = n_designs
+        self._T  = budget
+        self._delta = delta
+        self._n_0 = n_0
+        self._m = m
+
+        self._allocations = np.zeros(n_designs, np.int32)
+        self._means = np.zeros(n_designs, np.float64)
+        self._vars = np.zeros(n_designs, np.float64)
+        self._ses = np.zeros(n_designs, np.float64)
+        self._ratios = np.zeros(n_designs, np.float64)
+
+        #used when calculating running standard deviation across designs
+        #sum of squares
+        self._sq = np.zeros(n_designs, np.float64)
+
+        if min:
+            self._negate = -1.0
+            self._min = True
+        else:
+            self._negate = 1.0
+            self._min = False
+
+    def solve(self):
+        '''
+        This works okay for maximisation, but not if I 
+        include negatation! What am I doing wrong!
+        '''
+        
+        new_allocations = np.full(shape=self._k, 
+                                  fill_value=self._n_0,
+                                  dtype=np.int16)
+
+        while self._allocations.sum() < self._T:
+            
+            #simulate systems using new allocation of budget
+            self._simulate(new_allocations)
+                        
+            #calculate parameter c and deltas
+            c = self._parameter_c(self._k, self._m)
+            
+            deltas = self._means - c
+
+            #temp
+            #deltas *= self._negate
+            
+            #allocate
+            new_allocations = np.full(shape=self._k, 
+                                  fill_value=0,
+                                  dtype=np.int16)
+
+            if(self._delta + self._allocations.sum() > self._T):
+                print('here')
+
+            for i in range(self._delta):
+                
+                values = np.divide(self._allocations + new_allocations, np.square(np.divide(self._ses, deltas)))
+                ranks = get_ranks(values)
+                new_allocations[ranks.argmin()] += 1
+        
+        #return top m
+        if self._min:
+            best = np.argpartition(self._means, self._m)[:self._m]
+        else:
+            best = np.argpartition(self._means, -self._m)[-self._m:]
+        return best
+
+    def _simulate(self, new_allocations):
+        '''
+        For each design run n_0 initial replications
+        '''
+        for design in range(self._k):
+            for replication in range(new_allocations[design]):
+                self._env.action(design)
+
+    def _parameter_c(self, k, m):
+        order = np.argsort(self._means)
+        s_ses = self._ses[order]
+        s_means = self._means[order]
+
+        return((s_ses[k-m+1] * s_means[k-m]) + (s_ses[k-m] * s_means[k-m+1]))/(s_ses[k-m]+s_ses[k-m+1]) 
+
+
+    def feedback(self, *args, **kwargs):
+        '''
+        Feedback from the environment
+        Recieves a reward and updates understanding
+        of an arm
+
+        Parameters:
+        ------
+        *args -- list of argument
+                 0  sender object
+                 1. arm index to update
+                 2. observation
+
+        *kwargs -- dict of keyword arguments
+
+        '''
+        design_index = args[1]
+        observation = args[2]
+        self._allocations[design_index] +=1 
+                
+        #update running mean and standard deviation
+        self._update_moments(design_index, observation)
+        
+
+    def _update_moments(self, design_index, observation):
+        '''
+        Updates the running average, var of the design
+
+        Parameters:
+        ------
+        design_index -- int, index of the array to update
+
+        observation -- float, observation recieved from the last replication
+        '''
+        n = self._allocations[design_index]
+        current_mean = self._means[design_index]
+        new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation * self._negate
+
+        if n > 1:
+            self._sq[design_index] += (observation - abs(current_mean)) * (observation - abs(new_mean))
+            self._vars[design_index] = self._sq[design_index] / (n - 1)
+            self._ses[design_index] = np.sqrt(self._vars[design_index]) / np.sqrt(n)
+
+        self._means[design_index] = new_mean
+        
+
 def get_ranks(array):
     """
     Returns a numpy array containing ranks of numbers within a input numpy array
@@ -101,8 +274,8 @@ class OCBA(object):
         if n_0 < 5:
             warnings.warn('n_0 must be >= 5')
 
-        #if (budget - (n_designs * n_0)) % delta != 0:
-        #    raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
+        if (budget - (n_designs * n_0)) % delta != 0:
+            raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
 
         model.register_observer(self)
         self._env = model
@@ -149,7 +322,6 @@ class OCBA(object):
                     self._env.action(design)
 
         best = np.argmin(self._means)
-        #self._means *= self._negate
         return best
 
 
