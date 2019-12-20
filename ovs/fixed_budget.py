@@ -8,6 +8,7 @@ Fixed budget alpirhtms
 '''
 
 import numpy as np
+import warnings
 
 def ocba_m(dataset, k, allocations, T, delta, m):
     
@@ -63,6 +64,14 @@ class OCBA(object):
 
     Assumes each system design has similar run time.
 
+    Algorithm described in:
+    -------------------------
+    Stochastic Simulation Optimization: An Optimal Computer Budget 
+    Allocation.  by Chun-Hung Chen and Loo Hay Lee.
+
+    Pages 49-50 for algorithm description
+    Page 215 - for example C code.
+
     '''
     def __init__(self, model, n_designs, budget, delta, n_0=5, min=True):
         '''
@@ -89,8 +98,8 @@ class OCBA(object):
         min - bool, True if minimisation; False if maximisation.  (default=True)
 
         '''
-        #if n_0 < 5:
-        #    raise ValueError('n_0 must be >= 5')
+        if n_0 < 5:
+            warnings.warn('n_0 must be >= 5')
 
         #if (budget - (n_designs * n_0)) % delta != 0:
         #    raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
