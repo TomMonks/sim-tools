@@ -128,9 +128,6 @@ class OCBAM(object):
                                   fill_value=0,
                                   dtype=np.int16)
 
-            if(self._delta + self._allocations.sum() > self._T):
-                print('here')
-
             for i in range(self._delta):
                 
                 values = np.divide(self._allocations + new_allocations, np.square(np.divide(self._ses, deltas)))
@@ -138,10 +135,9 @@ class OCBAM(object):
                 new_allocations[ranks.argmin()] += 1
         
         #return top m
-        if self._min:
-            best = np.argpartition(self._means, self._m)[:self._m]
-        else:
-            best = np.argpartition(self._means, -self._m)[-self._m:]
+        best = np.argpartition(self._means, -self._m)[-self._m:]
+
+
         return best
 
     def _simulate(self, new_allocations):
