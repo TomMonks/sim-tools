@@ -8,7 +8,9 @@ if __name__ == '__main__':
     
     environment = BanditCasino(designs)
 
-    ocba = OCBA(environment, len(designs), 200, 10, n_0=10, min=False)
+    ocba = OCBA(environment, len(designs), 200, 1, n_0=5, min=False)
+
+    np.random.seed(101)
 
     results = ocba.solve()
     print('best design:\t{}'.format(results))

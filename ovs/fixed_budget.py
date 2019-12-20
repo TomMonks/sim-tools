@@ -89,11 +89,11 @@ class OCBA(object):
         min - bool, True if minimisation; False if maximisation.  (default=True)
 
         '''
-        if n_0 < 5:
-            raise ValueError('n_0 must be >= 5')
+        #if n_0 < 5:
+        #    raise ValueError('n_0 must be >= 5')
 
-        if (budget - (n_designs * n_0)) % delta != 0:
-            raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
+        #if (budget - (n_designs * n_0)) % delta != 0:
+        #    raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
 
         model.register_observer(self)
         self._env = model
@@ -199,9 +199,10 @@ class OCBA(object):
             ratio_s = (more_runs * self._ratios).sum()
 
             additional_runs[more_runs] = \
-                (budget_to_allocate / ratio_s * self._ratios[more_runs])
+                (budget_to_allocate / ratio_s) * self._ratios[more_runs]
 
-            additional_runs = additional_runs.astype(int)
+            #additional_runs = additional_runs.astype(int)
+            additional_runs = np.around(additional_runs).astype(int)
             
             mask = additional_runs < self._allocations
             additional_runs[mask] = self._allocations[mask]
@@ -213,6 +214,7 @@ class OCBA(object):
                 more_alloc = True
 
             if more_alloc:
+                budget_to_allocate = self._allocations.sum() + self._delta
                 budget_to_allocate -= (additional_runs * ~more_runs).sum()
 
         total_additional = additional_runs.sum()
