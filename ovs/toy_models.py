@@ -1,5 +1,10 @@
 import numpy as np
 
+def guassian_sequence_model(start, end, step=1):
+    bandits = [GaussianBandit(mean) for mean in range(start, end+1, step)]
+    return BanditCasino(bandits)
+
+
 def guassian_bandit_sequence(start, end, step=1):
     '''
     Sequence of GuassianBandit Arms.  Assumes unit variance. 
@@ -112,7 +117,7 @@ class BanditCasino(object):
     def __get_number_of_arms(self):
         return len(self._bandits)
     
-    def action(self, bandit_index):
+    def simulate(self, bandit_index):
         '''
         Play a specific bandit machine.
 

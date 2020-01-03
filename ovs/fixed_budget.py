@@ -130,7 +130,7 @@ class OCBAM(object):
         '''
         for design in range(self._k):
             for replication in range(new_allocations[design]):
-                self._env.action(design)
+                self._env.simulate(design)
 
     def _parameter_c(self, k, m):
         order = np.argsort(self._means)
@@ -308,7 +308,7 @@ class OCBA(object):
             
             for design in range(self._k):
                 for replication in range(new_allocations[design]):
-                    self._env.action(design)
+                    self._env.simulate(design)
 
         best = np.argmin(self._means)
         return best
@@ -320,7 +320,7 @@ class OCBA(object):
         '''
         for design in range(self._k):
             for replication in range(self._n_0):
-                self._env.action(design)
+                self._env.simulate(design)
 
     
     def _allocate(self):

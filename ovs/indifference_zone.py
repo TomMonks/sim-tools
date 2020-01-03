@@ -92,7 +92,7 @@ class KN(object):
 
     def _sequential_replication(self):
         for design in self._contenders:
-            self._env.action(design)
+            self._env.simulate(design)
         
         self._r += 1
         #print(self._r)
