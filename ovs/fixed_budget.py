@@ -48,7 +48,7 @@ class OCBAM(object):
     
 
     '''
-    def __init__(self, model, n_designs, budget, delta, n_0=5, m=2, min=True):
+    def __init__(self, model, n_designs, budget, delta, n_0=5, m=2, obj='min'):
         '''
         Constructor method for Optimal Budget Computer Allocation Top M
 
@@ -72,7 +72,7 @@ class OCBAM(object):
 
         m - int, the best m designs
 
-        min - bool, True if minimisation; False if maximisation.  (default=True)
+        obj - str, 'min' if minimisation; 'max' if maximisation.  (default='min')
 
         '''
         model.register_observer(self)
@@ -82,6 +82,7 @@ class OCBAM(object):
         self._delta = delta
         self._n_0 = n_0
         self._m = m
+        self._obj = obj
 
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
@@ -93,12 +94,17 @@ class OCBAM(object):
         #sum of squares
         self._sq = np.zeros(n_designs, np.float64)
 
-        if min:
+        if self._obj == 'min':
             self._negate = -1.0
             self._min = True
         else:
             self._negate = 1.0
             self._min = False
+
+
+    def __str__(self):
+        return f'OCBA(n_designs={self._k}, m={self._m}, budget={self._T}, delta={self._delta}, n_0={self._n_0}, obj={self._obj})'
+
 
     def solve(self):
         '''
@@ -242,7 +248,7 @@ class OCBA(object):
     Page 215 - for example C code.
 
     '''
-    def __init__(self, model, n_designs, budget, delta, n_0=5, min=True):
+    def __init__(self, model, n_designs, budget, delta, n_0=5, obj='min'):
         '''
         Constructor method for Optimal Budget Computer Allocation
 
@@ -264,14 +270,18 @@ class OCBA(object):
         n_0 - int, the total number of initial replications.  Minimum allowed is 5
         (default=5)
 
-        min - bool, True if minimisation; False if maximisation.  (default=True)
+        obj - str, 'min' if minimisation; 'max' if maximisation.  (default='min')
 
         '''
         if n_0 < 5:
-            warnings.warn('n_0 must be >= 5')
+            raise ValueError('n_0 must be >= 5')
 
         if (budget - (n_designs * n_0)) % delta != 0:
             raise ValueError('(budget - (n_designs * n_0)) must be multiple of delta')
+
+        types = ['min', 'max']
+        if obj not in types:
+            raise ValueError('obj parameter must be min or max')
 
         model.register_observer(self)
         self._env = model
@@ -279,6 +289,7 @@ class OCBA(object):
         self._T  = budget
         self._delta = delta
         self._n_0 = n_0
+        self._obj = obj
 
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
@@ -289,10 +300,14 @@ class OCBA(object):
         #sum of squares
         self._sq = np.zeros(n_designs, np.float64)
 
-        if min:
+        if obj == 'min':
             self._negate = 1.0
         else:
             self._negate = -1.0
+
+    def __str__(self):
+        return f'OCBA(n_designs={self._k}, budget={self._T}, delta={self._delta}, n_0={self._n_0}, obj={self._obj})'
+
 
     def reset(self):
         self._total_reward = 0
