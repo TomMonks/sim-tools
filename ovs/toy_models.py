@@ -1,4 +1,120 @@
+'''
+Toy models for testing optimisation via simulation procedures and
+for running models.
+'''
+
 import numpy as np
+
+class ManualOptimiser(object):
+    '''
+    A class to manually run individual and multiple replications
+    from competiting simulated designs of a system.
+    '''
+    def __init__(self, model, n_designs, verbose=False):
+        '''
+        Constructor
+        
+        Parameters:
+        -------
+        model - object, simulation model that implements simulate(design_index)
+        and register_observer(observer) methods
+        
+        n_designs - int, number of competiting designs 
+        
+        verbose_replications - bool, True if each individual rep observation
+        is displayed.  False if run silently.  (default=False)
+        '''
+        self._model = model
+        model.register_observer(self)
+        self.verbose = verbose
+        self._n_designs = n_designs
+        self.means = np.zeros(n_designs, dtype=np.float)
+        self.sigmas = np.zeros(n_designs, dtype=np.float)
+        self._sq = np.zeros(n_designs, dtype=np.float)
+        self._ses = np.zeros(n_designs, dtype=np.float)
+        self.allocations = np.zeros(n_designs, np.int32)
+        
+    def __str__(self):
+        return f"ManualOptimiser(model={self._model.__str__()}, n_designs={self._n_designs}, verbose={self.verbose})"    
+    
+    def simulate_designs(self, design_indexes=None, replications=1):
+        '''
+        Multiple replications of a simulated design
+        
+        Parameters:
+        --------
+        design_indexes - list, zero based design indexes.  If None
+        then all system designs are included. (default=None)
+        
+        replications - int, number of replications to run (default=1)
+        '''
+        
+        if design_indexes is None:
+            design_indexes = [design for design in range(self._n_designs)]
+        
+        for design_index in design_indexes:
+            self.simulate_design(design_index, replications)
+    
+    def simulate_design(self, design_index, replications=1):
+        '''
+        Multiple replications of a simulated design
+        
+        Parameters:
+        --------
+        design_index - int, zero based design index
+        replications - int, number of replications to run (default=1)
+        '''
+        for rep in range(replications):
+            self._model.simulate(design_index)
+    
+    def feedback(self, *args, **kwargs):
+        '''
+        Feedback from the simulation model
+        Recieves a reward and updates understanding
+        of an arm
+
+        Keyword arguments:
+        ------
+        *args -- list of argument
+                 0  sender object
+                 1. design index
+                 2. observation
+
+        *kwards -- dict of keyword arguments:
+                   None expected!
+
+        '''
+        design_index = args[1]
+        observation = args[2]
+        
+        self.allocations[design_index] += 1
+        self._update_moments(design_index, observation)
+        
+        if self.verbose:
+            print(observation)
+        
+    def _update_moments(self, design_index, observation):
+        '''
+        Updates the running average, var of the design
+
+        Parameters:
+        ------
+        design_index -- int, index of the array to update
+
+        observation -- float, observation recieved from the last replication
+        '''
+        n = self.allocations[design_index]
+        current_mean = self.means[design_index]
+        new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation
+
+        if n > 1:
+            self._sq[design_index] += (observation - abs(current_mean)) * (observation - abs(new_mean))
+            self.sigmas[design_index] = self._sq[design_index] / (n - 1)
+            self._ses[design_index] = np.sqrt(self.sigmas[design_index]) / np.sqrt(n)
+
+        self.means[design_index] = new_mean
+        
+
 
 def guassian_sequence_model(start, end, step=1):
     bandits = [GaussianBandit(mean) for mean in range(start, end+1, step)]
@@ -22,25 +138,54 @@ def guassian_bandit_sequence(start, end, step=1):
 
     '''    
     return [GaussianBandit(mean) for mean in range(start, end, step)]
+    
 
-
-
-
-
-def custom_guass_bandit_problem(*means):
+def random_guassian_model(mean_low, mean_high, var_low, var_high, n_designs):
     '''
-    Creates a list of BernouliBandit objects with
-    user specified means
+    Create a model with n system designs where the mean and variance of the normal
+    distributions are sampled to between the specified tolerances
+    
+    Parameters:
+    -------
+    mean_low - float, a lower bound on the means of the output distributions
+    
+    mean_high- float, an upper bound on the means
+    
+    var_low - float, a lower bound on the variance of the output distributions
+    
+    var_high - float, an upper bound on the variances.
+    
+    n_designs - int, the number of designs to create.
+    
+    Returns:
+    --------
+    BanditCasino with n_designs with means and variances between
+    specified limits.
+    '''
+    means = np.random.uniform(low=mean_low, high=mean_high, size=n_designs)
+    sigmas = np.random.uniform(low=var_low, high=var_high, size=n_designs)
+    return custom_guassian_model(means, sigmas)
+
+
+
+def custom_guassian_model(mus, sigmas):
+    '''
+    Creates a simulation model where each 
+    output distribution is distributed N ~(mu, sigma)
+
+    Assumes mus and signmas are of equal length
 
     Keyword arguments:
     ------
-    *means - variable size list of means
+    mus - variable size list of means
+    sigmas - list, variances
 
     Returns:
     ------
-    list, BernoulliBandits size = len(means)
+    object, simulation model 
     '''
-    return [GaussianBandit(mean) for mean in means]
+    bandits = [GaussianBandit(mu, sigma) for mu, sigma in zip(mus, sigmas)]
+    return BanditCasino(bandits)
 
 
 class GaussianBandit(object):
@@ -110,6 +255,9 @@ class BanditCasino(object):
         self._bandits = bandits
         self._current_index = 0
         self._observers = []
+
+    def __str__(self):
+        return f"BanditCasino()"
     
     def __getitem__(self, index):
         return self._bandits[index]
