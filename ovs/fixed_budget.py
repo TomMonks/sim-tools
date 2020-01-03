@@ -10,28 +10,6 @@ Fixed budget alpirhtms
 import numpy as np
 import warnings
 
-def ocba_m(dataset, k, allocations, T, delta, m):
-    
-    while allocations.sum() < T:
-        
-        #simulate systems using new allocation of budget
-        reps = simulate(dataset, k, allocations) 
-        
-        #calculate sample means and standard errors
-        means, ses = summary_statistics(reps, allocations)
-        
-        #calculate parameter c and deltas
-        c = parameter_c(means, ses, k, m)
-        deltas = means - c
-        
-        #allocate
-        for i in range(delta):
-            values = np.divide(allocations, np.square(np.divide(ses, deltas)))
-            ranks = get_ranks(values)
-            allocations[ranks.argmin()] += 1
-            
-    return means, ses, allocations
-
 
 class OCBAM(object):
     '''

@@ -54,6 +54,9 @@ class KN(object):
 
         self._eta = 0.5 * (np.power((2 * alpha) / (self._k - 1), -2/(self._n_0-1)) - 1)
 
+    def __str__(self):
+        return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0})"
+
     def reset(self):
         self._total_reward = 0
         self._current_round = 0
