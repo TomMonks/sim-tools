@@ -10,7 +10,7 @@ with a fixed budget (fixed total number of replications)
 
 import numpy as np
 
-from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence, guassian_sequence_model
 
 class KN(object):
     def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
@@ -38,10 +38,9 @@ class KN(object):
 
         model.register_observer(self)
         self._env = model
-        #self._total_rounds = budget
-        self._total_reward = 0
+
         self._current_round = 0
-        self._actions = np.zeros(n_designs, np.int32)
+        self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
         self._init_obs = np.zeros((n_designs, n_0), np.float64)
         
@@ -59,10 +58,9 @@ class KN(object):
 
     def reset(self):
         self._total_reward = 0
-        self._current_round = 0
-        self._actions = np.zeros(self._k, np.int32)
+        self._allocations = np.zeros(self._k, np.int32)
         self._means = np.zeros(self._k, np.float64)
-        self._actions = np.zeros(self._k, np.int32)
+        self._allocations = np.zeros(self._k, np.int32)
         self._init_obs = np.zeros((self._k, self._n_0), np.float64)
         self._contenders = np.arange(self._k)
     
@@ -104,6 +102,8 @@ class KN(object):
         #flattens array and drops differences with same design
         return variance_of_diffs[~np.eye(variance_of_diffs.shape[0],dtype=bool)]
 
+    #need to check if this is correct...
+    #possibly a bug.  Works when in designs are ordered, but not otherwise.
     def _screening(self):
         self._contenders_old = np.asarray(self._contenders).copy()
         contenders_mask = np.full(self._contenders.shape, True, dtype=bool)
@@ -173,20 +173,12 @@ class KN(object):
         '''
         design_index = args[1]
         reward = args[2]
-        self._actions[design_index] +=1 #+= number of replicaions
+        self._allocations[design_index] +=1 #+= number of replicaions
         self._means[design_index] = self.updated_mean_estimate(design_index, reward)
         if self._r < self._n_0:
             self._init_obs[design_index][self._r] = reward
         #calculate running standard deviation.
         
-
-        #UCB specific to remove...
-        #first run through divides by zero.  In numpy this operation yields inf.
-        #the with np.errstate() call/context avoid warning user of the operation 
-        #with np.errstate(divide='ignore', invalid='ignore'):
-        #    deltas = np.sqrt(3/2 * (np.log(self._current_round + 1) / self._actions))
-        
-        #self._upper_bounds = self._means + deltas
         
     def updated_mean_estimate(self, design_index, reward):
         '''
@@ -201,7 +193,7 @@ class KN(object):
         ------
         float, the new mean estimate for the selected arm
         '''
-        n = self._actions[design_index]
+        n = self._allocations[design_index]
         current_value = self._means[design_index]
         new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
         return new_value 
@@ -213,13 +205,3 @@ class KN(object):
 
 
 
-if __name__ == '__main__':
-    designs = guassian_bandit_sequence(1, 11)
-    
-    environment = BanditCasino(designs)
-
-    kn = KN(environment, len(designs), 
-            delta=0.05, alpha=0.1, n_0=2)
-
-    results = kn.solve()
-    print(results)

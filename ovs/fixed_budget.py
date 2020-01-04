@@ -234,7 +234,7 @@ class OCBA(object):
         ---------
 
         model - object, simulation model that implements 
-        interface action(design)
+        interface simulate(design)
 
         n_designs - int, (k) the number of competing system designs 
 
