@@ -114,7 +114,9 @@ class KN(object):
             for l in range(len(self._contenders_old)):
                 if i != l:
                     design_i, design_l = self._contenders_old[i], self._contenders_old[l]
-                    if not self._design_still_in_contention(i, l):
+                    #is this a mistake here... shoul dthi sbe design_1, design_l
+                    #to do: changed from i and l to design_i and design_l
+                    if not self._design_still_in_contention(design_i, design_l):
                         contenders_mask[i] = False
                         break
                 

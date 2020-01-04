@@ -1,6 +1,6 @@
 import numpy as np
 
-from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence, guassian_sequence_model
+from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence, guassian_sequence_model, random_guassian_model
 from ovs.fixed_budget import OCBA
 from ovs.indifference_zone import KN
 
@@ -11,9 +11,9 @@ if __name__ == '__main__':
     #something not quite right with KN.  
     #quite often is incorrect with random model, but does a lot better with 
     #sequence.  This suggests taht something wrong with contenders screening...
-    #model = random_guassian_model(mean_low=1, mean_high=15, 
-    #                              var_low=1, var_high=1,
-    #                              n_designs=10)
+    model = random_guassian_model(mean_low=1, mean_high=15, 
+                                  var_low=1, var_high=1,
+                                  n_designs=10)
 
     kn = KN(model=model, 
             n_designs=10, 
