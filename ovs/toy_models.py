@@ -264,6 +264,16 @@ class BanditCasino(object):
 
     def __get_number_of_arms(self):
         return len(self._bandits)
+
+    def _get_best_arm(self):
+        means = []
+        for bandit in self._bandits:
+            means.append(bandit._mu)
+        
+        return np.argmax(np.array(means))
+        
+
+
     
     def simulate(self, bandit_index):
         '''
@@ -283,7 +293,7 @@ class BanditCasino(object):
         Selects a bandit index at random and plays it.
         '''
         bandit_index = np.random.choice(len(self._bandits))
-        self.action(bandit_index)
+        self.simulate(bandit_index)
 
        
     def __iter__(self):
@@ -292,6 +302,7 @@ class BanditCasino(object):
     def __next__(self):
         self._current_index += 1
         if self._current_index > len(self._bandits):
+            self._current_index = 0
             raise StopIteration
         else:
             return self._bandits[self._current_index - 1]
@@ -304,3 +315,4 @@ class BanditCasino(object):
             observer.feedback(self, *args, **kwargs) 
 
     number_of_arms = property(__get_number_of_arms)
+    best_design = property(_get_best_arm)
