@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     means = [4, 4.1, 4.2, 4, 4.1, 4.3, 4, 4.1, 4.2, 4.2]
     variances = [1, 1, 1, 0.1, 0.1, 10, 10, 10, 10, 0.1]
-    SEED = 10
+    SEED = 12
     np.random.seed(SEED)
     guass_model = custom_guassian_model(means, variances)
 
@@ -34,7 +34,6 @@ if __name__ == '__main__':
     print('allocations\t{0}'.format(kn._allocations))
     print('total reps\t{0}'.format(kn._allocations.sum()))
     print('means\t\t{0}'.format(kn._means))
-    model[best_design[0]]._mu
 
 
     knpp = KNPlusPlus(model=guass_model, 
@@ -49,7 +48,5 @@ if __name__ == '__main__':
     print('allocations\t{0}'.format(knpp._allocations))
     print('total reps\t{0}'.format(knpp._allocations.sum()))
     print('means\t\t{0}'.format(knpp._means))
-    for var in knpp._vars:
-
-        print('{0:.2f}'.format(var), end=", ")
+    
     model[best_design[0]]._mu
