@@ -18,7 +18,8 @@ if __name__ == '__main__':
 
     means = [4, 4.1, 4.2, 4, 4.1, 4.3, 4, 4.1, 4.2, 4.2]
     variances = [1, 1, 1, 0.1, 0.1, 10, 10, 10, 10, 0.1]
-    SEED = 12
+    SEED = 999
+    N_0 = 10
     np.random.seed(SEED)
     guass_model = custom_guassian_model(means, variances)
 
@@ -26,7 +27,7 @@ if __name__ == '__main__':
             n_designs=10, 
             delta=0.15, 
             alpha=0.05, 
-            n_0=50)
+            n_0=N_0)
 
     kn.reset()
     best_design = kn.solve()
@@ -40,7 +41,7 @@ if __name__ == '__main__':
             n_designs=10, 
             delta=0.15, 
             alpha=0.05, 
-            n_0=10)
+            n_0=N_0)
 
     np.random.seed(SEED)
     best_design = knpp.solve()

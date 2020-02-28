@@ -74,14 +74,11 @@ class KNPlusPlus(object):
         self._n_0 = n_0
         self._r = 0
 
-        self._negate = -1.0
-
-        #temp tp remove
-        self._init_obs = np.zeros((n_designs, n_0), np.float64)
+        self._negate = 1.0
 
 
     def _calculate_eta(self):
-        return 0.5 * (np.power(2 * np.power(1 - (1 - self._alpha), 1 / (self._k - 1)), -2/(self._n-1)) - 1)
+        return 0.5 * (np.power(2 * (1 - np.power((1 - self._alpha), 1 / (self._k - 1))), -2/(self._n-1)) - 1)
 
     def __str__(self):
         return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0})"
@@ -164,12 +161,12 @@ class KNPlusPlus(object):
         for i in range(len(self._contenders_old)):
             for j in range(len(self._contenders_old)):
 
-                if i != j and contenders_mask[self._contenders_old[j]]:
+                if i != j:
                     design_i, design_j = self._contenders_old[i], self._contenders_old[j]
                     w_ij = self._elimination_distance(design_i, design_j)
 
                     if self._means[design_i] < self._means[design_j] - w_ij:
-                        contenders_mask[design_i] = False
+                        contenders_mask[i] = False
                         break
                
         self._contenders = self._contenders[contenders_mask]
