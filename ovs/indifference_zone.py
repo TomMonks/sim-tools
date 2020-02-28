@@ -12,7 +12,11 @@ import numpy as np
 
 from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence, guassian_sequence_model
 
-class KNPLusPlus(object):
+class KNPlusPlus(object):
+    '''
+    KN++ algorithm for Ranking and Selection
+
+    '''
     def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
         '''
         Constructor
@@ -23,10 +27,8 @@ class KNPLusPlus(object):
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
         self._vars = np.zeros(n_designs, np.float64)
+        #used for calculating running sample variance
         self._sq = np.zeros(n_designs, np.float64)
-
-        #is this still needed in KN++?
-        self._init_obs = np.zeros((n_designs, n_0), np.float64)
 
         self._k = n_designs
 
@@ -39,13 +41,17 @@ class KNPLusPlus(object):
         self._n_0 = n_0
         self._r = 0
 
-    def _calculate_eta(self, n):
-        return 0.5 * (np.power(2 * np.power(1 - (1 - alpha), 1 / (self._k - 1)), -2/(self._n-1)) - 1)
+        self._negate = -1.0
+
+    def _calculate_eta(self):
+        return 0.5 * (np.power(2 * np.power(1 - (1 - self._alpha), 1 / (self._k - 1)), -2/(self._n-1)) - 1)
 
     def __str__(self):
         return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0})"
 
     def reset(self):
+        '''Resets all attributes
+        '''
         self._total_reward = 0
         self._allocations = np.zeros(self._k, np.int32)
         self._means = np.zeros(self._k, np.float64)
@@ -54,11 +60,13 @@ class KNPLusPlus(object):
         self._contenders = np.arange(self._k)
         self._vars = np.zeros(self._k, np.float64)
         self._sq = np.zeros(self._k, np.float64)
-        self._tau = self._n0
         self._n = 0
 
 
     def solve(self):
+        '''Run KN++
+        '''
+        self.reset()
         self._initialisation()
 
         while not self._stopping():
@@ -77,22 +85,36 @@ class KNPLusPlus(object):
         Estimate initial sample means and variances of the differences
 
         '''      
-        
         for observation in range(self._n_0):
             self._sequential_replication()
 
         self._eta = self._calculate_eta()
-        self._h_squared = 2 * self._eta * (self._n_0 - 1)
+        self._h_squared = 2 * self._eta * (self._n - 1)
+
+    def _stopping(self):
+        '''
+        If |I| = 1 then stop (and select the system whose index is in I)
+        else take one further sample from each system
+
+        '''
+        if len(self._contenders) == 1:
+            return True
+        
+        return False
                 
     
     def _sequential_replication(self):
+        '''
+        Run a single replication of each
+        design
+        '''
         for design in self._contenders:
             self._env.simulate(design)
         
         self._n += 1
 
-        def _screening(self):
-            '''
+    def _screening(self):
+        '''
         Loop through remaining contenders and screen if 
         mean(design_i) < mean(design_j) - epsilon_ij
 
@@ -106,15 +128,16 @@ class KNPLusPlus(object):
         #designs in contention for this round
         for i in range(len(self._contenders_old)):
             for j in range(len(self._contenders_old)):
-                if i != j:
+                #added and contenders_mask[j]
+                if i != j and contenders_mask[self._contenders_old[j]]:
                     design_i, design_j = self._contenders_old[i], self._contenders_old[j]
                     d_ij = self._mean_difference(design_i, design_j)
                     epsilon_ij = self._elimination_distance(design_i, design_j)
                     if d_ij > epsilon_ij:
                         contenders_mask[design_i] = False
                         break
-                    elif design_i < -epsilon_ij:
-                        contenders_mask[design_j] = False                
+                    #elif d_ij < -epsilon_ij:
+                    #    contenders_mask[design_j] = False                
 
         #this isn't as efficient as it could be as design j might be eliminated 
         #during a loop and hence doesn't need to be rechecked...TM
@@ -125,30 +148,41 @@ class KNPLusPlus(object):
         '''diff between two sample means
         '''
         mean_i = self._means[design_i]
-        mean_l = self._means[design_j]
+        mean_j = self._means[design_j]
         return mean_i - mean_j
        
 
     def _elimination_distance(self, design_i, design_j):
         '''
-        the distance mean(design_i) can fall below mean(design_j)
-        before it is ELIMINATED (to be read in the voice of Arnie)
+        Returns the distance mean(design_i) can fall below mean(design_j)
+        before it is ELIMINATED.
+
+        Parameters:
+        -----
+        design_i - int, the index of the first design
+        
+        design_j - int, the index of the second design
+
+        Returns:
+        --------
+        float. 
         '''
         #sample variances
         var_i = self._vars[design_i]
         var_j = self._vars[design_j]
+        sum_of_vars = var_i + var_j
+
+        
 
         w_ij = (self._delta / (2 * self._n)) \
-            * (((self._h_squared * (var_i + var_j)) / self._delta**2) - self._n)
+            * (((self._h_squared * (sum_of_vars)) / self._delta**2) - self._n)
 
-        return max(0, w_il)
-
-
-
+        print(w_ij)
+        return max(0, w_ij)
 
 
     def feedback(self, *args, **kwargs):
-            '''
+        '''
         Feedback from the simulated environment
         Recieves an observation from the system
 
@@ -167,12 +201,12 @@ class KNPLusPlus(object):
         self._allocations[design_index] +=1 
                 
         #update running mean and standard deviation
-        self._update_moments(design_index, observation)
+        self._update_sample_estimates(design_index, observation)
         
 
-    def _update_moments(self, design_index, observation):
+    def _update_sample_estimates(self, design_index, observation):
         '''
-        Updates the running average, var of the design
+        Updates the running sample mean and var of the design
 
         Parameters:
         ------
@@ -392,8 +426,6 @@ class KN(object):
         return new_value 
 
     
-
-
 
 
 
