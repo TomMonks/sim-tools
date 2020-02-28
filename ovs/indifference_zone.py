@@ -20,6 +20,13 @@ class KNPlusPlus(object):
     '''
     KN++ algorithm for Ranking and Selection
 
+    More coordiation than KN. V
+    Variances are updated at each stage.
+
+    References.
+    http://users.iems.northwestern.edu/~nelsonb/Publications/17KimNelson.pdf
+    https://www2.isye.gatech.edu/~skim/KimNelson.pdf 
+
     '''
     def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
         '''
@@ -267,6 +274,9 @@ class KN(object):
         Constructor method for KN  Ranking and Selection Procedure.
 
         This works well for up to 20 competing designs
+
+        References. 
+        http://users.iems.northwestern.edu/~nelsonb/Publications/KimNelsonKN.pdf
 
         Parameters:
         ----------
