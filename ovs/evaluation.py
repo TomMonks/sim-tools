@@ -43,10 +43,12 @@ class ExperimentResults(object):
     '''
     Results Container for an Agent Experiment
     '''
-    def __init__(self, selections, correct_selections, p_correct_selections):
+    def __init__(self, selections, correct_selections, p_correct_selections, 
+                 opportunity_cost):
         self.selections = selections
         self.correct_selections = correct_selections
         self.p_correct_selections = p_correct_selections
+        self.expected_opportunity_cost = opportunity_cost
 
 class Experiment(object):
     '''
@@ -71,7 +73,22 @@ class Experiment(object):
         
         p_correct_selections = correct_selections / self._reps
 
-        return ExperimentResults(selections, correct_selections, p_correct_selections)
+        opportunity_cost = self._calculate_exp_opportunity_cost(selections)
+
+        return ExperimentResults(selections, 
+                                correct_selections, 
+                                p_correct_selections, 
+                                opportunity_cost)
+
+
+    def _calculate_exp_opportunity_cost(self, selections):
+        best_mean = self._env[self._env.best_design]._mu
+        
+        oc = 0.0
+        for index in selections:
+            oc += best_mean - self._env[index]._mu            
+        return oc / len(selections)
+        
     
 
 class GridExperiment(object):

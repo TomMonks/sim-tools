@@ -301,6 +301,7 @@ class OCBA(object):
         run the ranking and selection procedure
         Vanilla OCBA 
         '''
+        self.reset()
         self._initialise()
 
         while self._allocations.sum() < self._T:
