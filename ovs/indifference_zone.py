@@ -28,7 +28,7 @@ class KNPlusPlus(object):
     https://www2.isye.gatech.edu/~skim/KimNelson.pdf 
 
     '''
-    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
+    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj='max'):
         '''
         Constructor method for KN++  Ranking and Selection Procedure.
 
@@ -48,6 +48,8 @@ class KNPlusPlus(object):
         probability of correct selection
 
         n_0 - int, the number of initial observations (default = 2)
+        
+        obj - str, objective 'max' or 'min' (default='max)
 
         '''
         model.register_observer(self)
@@ -74,14 +76,24 @@ class KNPlusPlus(object):
         self._n_0 = n_0
         self._r = 0
 
-        self._negate = 1.0
+        types = ['min', 'max']
+        if obj not in types:
+            raise ValueError('obj parameter must be min or max')
+
+        #code set up for max negate for min.
+        if obj == 'max':
+            self._negate = 1.0
+        else:
+            self._negate = -1.0
+
+        self._obj = obj
 
 
     def _calculate_eta(self):
         return 0.5 * (np.power(2 * (1 - np.power((1 - self._alpha), 1 / (self._k - 1))), -2/(self._n-1)) - 1)
 
     def __str__(self):
-        return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0})"
+        return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0}, obj={self._obj})"
 
     def reset(self):
         '''Resets all attributes
@@ -266,7 +278,7 @@ class KNPlusPlus(object):
 
 
 class KN(object):
-    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2):
+    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj='max'):
         '''
         Constructor method for KN  Ranking and Selection Procedure.
 
@@ -313,9 +325,21 @@ class KN(object):
 
         self._eta = 0.5 * (np.power((2 * alpha) / (self._k - 1), -2/(self._n_0-1)) - 1)
 
+        types = ['min', 'max']
+        if obj not in types:
+            raise ValueError('obj parameter must be min or max')
+
+        #code set up for max negate for min.
+        if obj == 'max':
+            self._negate = 1.0
+        else:
+            self._negate = -1.0
+
+        self._obj = obj
+
 
     def __str__(self):
-        return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0})"
+        return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0}, obj={self._obj})"
 
     def reset(self):
         self._total_reward = 0
@@ -430,30 +454,30 @@ class KN(object):
         ------
         *args -- list of argument
                  0  sender object
-                 1. arm index to update
-                 2. reward
+                 1. design index to update
+                 2. observation
 
         *kwards -- dict of keyword arguments:
                    None expected!
 
         '''
         design_index = args[1]
-        reward = args[2]
-        self._allocations[design_index] +=1 #+= number of replicaions
-        self._means[design_index] = self.updated_mean_estimate(design_index, reward)
+        observation = args[2]
+        self._allocations[design_index] +=1 
+        self._means[design_index] = self.updated_mean_estimate(design_index, observation)
         if self._r < self._n_0:
-            self._init_obs[design_index][self._r] = reward
-        #calculate running standard deviation.
+            self._init_obs[design_index][self._r] = observation
         
         
-    def updated_mean_estimate(self, design_index, reward):
+        
+    def updated_mean_estimate(self, design_index, observation):
         '''
         Calculate the new running average of the design
 
         Keyword arguments:
         ------
         design_index -- int, index of the array to update
-        reward -- float, reward recieved from the last action
+        observation -- float, observation recieved from the last action
 
         Returns:
         ------
@@ -461,7 +485,7 @@ class KN(object):
         '''
         n = self._allocations[design_index]
         current_value = self._means[design_index]
-        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * reward
+        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * observation * self._negate
         return new_value 
 
     
