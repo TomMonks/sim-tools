@@ -11,14 +11,13 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="ovs_py",
+    name="sim-tools",
     #there must be an way to auto tick up the version number...
     version=__version__,
     author="Thomas Monks",
     author_email="t.m.w.monks@exeter.ac.uk",
     license="The MIT License (MIT)",
-    description="Optimisation Via Simulation in PYthon.",
-    #read in from readme.md and will appear on PyPi
+    description="Simulation Tools for Education and Practice",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TomMonks/ovs-tutorial",
