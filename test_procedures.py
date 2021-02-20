@@ -1,8 +1,12 @@
 import numpy as np
 
-from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence, custom_guassian_model, guassian_sequence_model, random_guassian_model
-from ovs.fixed_budget import OCBA
-from ovs.indifference_zone import KN, KNPlusPlus
+from sim_tools.ovs.toy_models import (BanditCasino, GaussianBandit, 
+                                        guassian_bandit_sequence, 
+                                        custom_guassian_model, 
+                                        guassian_sequence_model, 
+                                        random_guassian_model)
+from sim_tools.ovs.fixed_budget import OCBA
+from sim_tools.ovs.indifference_zone import KN, KNPlusPlus
 
 if __name__ == '__main__':
     

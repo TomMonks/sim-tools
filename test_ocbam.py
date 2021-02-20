@@ -1,7 +1,7 @@
 import numpy as np
 
-from ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
-from ovs.fixed_budget import OCBAM
+from sim_tools.ovs.toy_models import BanditCasino, GaussianBandit, guassian_bandit_sequence
+from sim_tools.ovs.fixed_budget import OCBAM
 
 if __name__ == '__main__':
     designs = guassian_bandit_sequence(1, 11)
