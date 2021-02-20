@@ -11,10 +11,10 @@ update the variance estimate of designs at each stage.
 
 import numpy as np
 
-from ovs.toy_models import (BanditCasino, 
-                            GaussianBandit, 
-                            guassian_bandit_sequence, 
-                            guassian_sequence_model)
+from .toy_models import (BanditCasino,    
+                         GaussianBandit, 
+                         guassian_bandit_sequence, 
+                         guassian_sequence_model)
 
 class KNPlusPlus(object):
     '''
