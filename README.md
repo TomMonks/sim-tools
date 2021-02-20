@@ -37,6 +37,11 @@ If you use sim0tools for research, a practical report, education or any reason p
 }
 ```
 
+# Examples
+
+* Optimisation Via Simulation [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TomMonks/sim-tools/blob/master/examples/sw21_tutorial.ipynb)
+
+
 ## Contributing to sim-tools
 
 Please fork Dev, make your modifications, run the unit tests and submit a pull request for review.
