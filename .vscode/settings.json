@@ -1,5 +1,0 @@
-{
-    "python.pythonPath": "/Users/thomasmonks/opt/anaconda3/bin/python",
-
-    "code-runner.executorMap.python": "python3 -u"
-}

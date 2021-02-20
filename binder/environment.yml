@@ -1,8 +1,8 @@
-name: ovs_py_dev
+name: sim_tools_dev
 channels:
   - defaults
 dependencies:
-  - jupyterlab=1.2.6
+  - jupyterlab=2.1.2
   - matplotlib=3.1.3
   - numpy=1.18.1
   - pandas=1.0.1
