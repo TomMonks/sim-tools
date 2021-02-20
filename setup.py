@@ -1,5 +1,5 @@
 import setuptools
-from ovs import __version__
+from sim_tools import __version__
 
 # Read in the requirements.txt file
 with open("requirements.txt") as f:
