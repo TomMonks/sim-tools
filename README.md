@@ -1,5 +1,6 @@
 # sim-tools: tools to support the simulation process in python.
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/TomMonks/sim-tools/HEAD)
 [![DOI](https://zenodo.org/badge/225608065.svg)](https://zenodo.org/badge/latestdoi/225608065)
 [![PyPI version fury.io](https://badge.fury.io/py/sim-tools.svg)](https://pypi.python.org/pypi/sim-tools/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -17,7 +18,7 @@ sim-tools is being developed to support simulation education and applied simulat
 
 1. Implementation of classic optimisation via Simulation procedures such as KN, KN++, OBCA and OBCA-m
 
-## Two simple ways to explore forecast-tools
+## Two simple ways to explore sim-tools
 
 1. `pip install sim-tools`
 2. Click on the launch-binder at the top of this readme. This will open example Jupyter notebooks in the cloud via Binder.
