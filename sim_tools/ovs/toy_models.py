@@ -29,7 +29,7 @@ class ManualOptimiser(object):
         self.verbose = verbose
         self._n_designs = n_designs
         self.means = np.zeros(n_designs, dtype=np.float)
-        self.sigmas = np.zeros(n_designs, dtype=np.float)
+        self.vars = np.zeros(n_designs, dtype=np.float)
         self._sq = np.zeros(n_designs, dtype=np.float)
         self._ses = np.zeros(n_designs, dtype=np.float)
         self.allocations = np.zeros(n_designs, np.int32)
@@ -109,8 +109,8 @@ class ManualOptimiser(object):
 
         if n > 1:
             self._sq[design_index] += (observation - abs(current_mean)) * (observation - abs(new_mean))
-            self.sigmas[design_index] = self._sq[design_index] / (n - 1)
-            self._ses[design_index] = np.sqrt(self.sigmas[design_index]) / np.sqrt(n)
+            self.vars[design_index] = self._sq[design_index] / (n - 1)
+            self._ses[design_index] = np.sqrt(self.vars[design_index]) / np.sqrt(n)
 
         self.means[design_index] = new_mean
         
