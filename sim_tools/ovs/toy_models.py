@@ -116,14 +116,33 @@ class ManualOptimiser(object):
         
 
 
-def guassian_sequence_model(start, end, step=1):
+def gaussian_sequence_model(start, end, step=1):
+    '''
+    Sequence of GaussianBandit Arms.  Assumes unit variance. 
+    e.g. start = 1, end = 10 return 10 bandits arms with means 1 through 10.
+
+    Parameters:
+    -------
+    start: int, 
+        start of sequence of means (inclusive)
+
+    end: int, 
+        end of sequence of means (inclusive)
+
+    step: int, optional (default = 1)
+        step size for sequence 
+
+    Returns:
+    -------
+    list of GaussianBandit objects ordered by means
+    '''
     bandits = [GaussianBandit(mean) for mean in range(start, end+1, step)]
     return BanditCasino(bandits)
 
 
-def guassian_bandit_sequence(start, end, step=1):
+def gaussian_bandit_sequence(start, end, step=1):
     '''
-    Sequence of GuassianBandit Arms.  Assumes unit variance. 
+    Sequence of GaussianBandit Arms.  Assumes unit variance. 
     e.g. start = 1, end = 10 return 10 bandits arms with means 1 through 10.
 
     Parameters:
@@ -140,7 +159,7 @@ def guassian_bandit_sequence(start, end, step=1):
     return [GaussianBandit(mean) for mean in range(start, end, step)]
     
 
-def random_guassian_model(mean_low, mean_high, var_low, var_high, n_designs):
+def random_gaussian_model(mean_low, mean_high, var_low, var_high, n_designs):
     '''
     Create a model with n system designs where the mean and variance of the normal
     distributions are sampled to between the specified tolerances
@@ -164,11 +183,11 @@ def random_guassian_model(mean_low, mean_high, var_low, var_high, n_designs):
     '''
     means = np.random.uniform(low=mean_low, high=mean_high, size=n_designs)
     sigmas = np.random.uniform(low=var_low, high=var_high, size=n_designs)
-    return custom_guassian_model(means, sigmas)
+    return custom_gaussian_model(means, sigmas)
 
 
 
-def custom_guassian_model(mus, sigmas):
+def custom_gaussian_model(mus, sigmas):
     '''
     Creates a simulation model where each 
     output distribution is distributed N ~(mu, sigma)
