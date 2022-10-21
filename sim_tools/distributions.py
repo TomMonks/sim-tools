@@ -274,7 +274,20 @@ class FixedDistribution(Distribution):
         else:
             return self.value
 
-
+class CombinationDistribution(Distribution):
+    '''
+    Simple summation of samples from multiple distributions.
+    '''
+    def __init__(self, *dists):
+        self.dists = dists
+        
+    def sample(self, size=None):
+        
+        total = 0.0 if size is not None else np.zeros(size)
+        
+        for dist in self.dists:
+            total += dist.sample(size)
+        return total
 
 if __name__ == '__main__':
     n = Normal(0, 1, allow_neg=False)
