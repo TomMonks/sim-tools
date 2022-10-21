@@ -295,7 +295,7 @@ class CombinationDistribution(Distribution):
         self.dists = dists
 
     def sample(self, size=None):
-        total = 0.0 if size is not None else np.zeros(size)
+        total = 0.0 if size is None else np.zeros(size)
 
         for dist in self.dists:
             total += dist.sample(size)
