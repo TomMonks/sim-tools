@@ -23,6 +23,10 @@ def test_uniform():
     d = dists.Uniform(10, 1, random_seed=SEED_1)
     assert type(d.sample()) == float
 
+def test_tri():
+    d = dists.Triangular(1.0, 10.0, 25.0, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
 def test_bernoulli():
     d = dists.Bernoulli(0.3, random_seed=SEED_1)
     assert type(d.sample()) == int

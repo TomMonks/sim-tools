@@ -261,6 +261,21 @@ class Uniform(Distribution):
         return self.rng.uniform(low=self.low, high=self.high, size=size)
 
 
+class Triangular(Distribution):
+    '''
+    Convenience class for the triangular distribution.
+    packages up distribution parameters, seed and random generator.
+    '''
+    def __init__(self, low, mode, high, random_seed=None):
+        super().__init__(random_seed)
+        self.low = low
+        self.high = high
+        self.mode = mode
+        
+    def sample(self, size=None):
+        return self.rng.triangular(self.low, self.mode, self.high, size=size)
+
+
 class FixedDistribution(Distribution):
     '''
     Simple fixed distribution.  Return scalar or numpy array
