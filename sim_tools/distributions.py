@@ -251,6 +251,31 @@ class Uniform(Distribution):
         '''
         return self.rng.uniform(low=self.low, high=self.high, size=size)
 
+class FixedDistribution(Distribution):
+    '''
+    Simple fixed distribution.  Return scalar or numpy array
+    of a fixed value.
+    '''
+    def __init__(self, value):
+        self.value = value
+        
+    def sample(self, size=None):
+        '''
+        Generate a sample from the fixed distribution
+        
+        Params:
+        ------
+        size: int, optional (default=None)
+            the number of samples to return.  If size=None then a single
+            sample is returned.
+        '''
+        if size is not None:
+            return np.full(size, self.value)
+        else:
+            return self.value
+
+
+
 if __name__ == '__main__':
     n = Normal(0, 1, allow_neg=False)
     samples = n.sample(10)
