@@ -7,7 +7,6 @@ Each distribution has its own random number stream.
 
 from abc import ABC, abstractmethod
 import math
-from turtle import clear
 import numpy as np
 
 
@@ -17,7 +16,7 @@ class Distribution(ABC):
     All distributions derived from it.
     '''
     def __init__(self, random_seed=None):
-        self.rng = np.random.default_rng(random_seed) 
+        self.rng = np.random.default_rng(seed=random_seed) 
 
     @abstractmethod
     def sample(self, size=None):
