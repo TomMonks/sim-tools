@@ -107,14 +107,18 @@ class ManualOptimiser(object):
         """
         n = self.allocations[design_index]
         current_mean = self.means[design_index]
-        new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation
+        new_mean = ((n - 1) / float(n)) * current_mean + (
+            1 / float(n)
+        ) * observation
 
         if n > 1:
             self._sq[design_index] += (observation - abs(current_mean)) * (
                 observation - abs(new_mean)
             )
             self.vars[design_index] = self._sq[design_index] / (n - 1)
-            self._ses[design_index] = np.sqrt(self.vars[design_index]) / np.sqrt(n)
+            self._ses[design_index] = np.sqrt(
+                self.vars[design_index]
+            ) / np.sqrt(n)
 
         self.means[design_index] = new_mean
 
@@ -275,7 +279,7 @@ class BanditCasino(object):
         self._observers = []
 
     def __str__(self):
-        return f"BanditCasino()"
+        return "BanditCasino()"
 
     def __getitem__(self, index):
         return self._bandits[index]
