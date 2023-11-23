@@ -28,10 +28,10 @@ class ManualOptimiser(object):
         model.register_observer(self)
         self.verbose = verbose
         self._n_designs = n_designs
-        self.means = np.zeros(n_designs, dtype=np.float)
-        self.vars = np.zeros(n_designs, dtype=np.float)
-        self._sq = np.zeros(n_designs, dtype=np.float)
-        self._ses = np.zeros(n_designs, dtype=np.float)
+        self.means = np.zeros(n_designs, dtype='float')
+        self.vars = np.zeros(n_designs, dtype='float')
+        self._sq = np.zeros(n_designs, dtype='float')
+        self._ses = np.zeros(n_designs, dtype='float')
         self.allocations = np.zeros(n_designs, np.int32)
         
     def __str__(self):

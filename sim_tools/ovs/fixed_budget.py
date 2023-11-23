@@ -360,7 +360,7 @@ class OCBA(object):
 
         #got all of the ratios now...
         more_runs = np.full(self._k, True, dtype=bool)
-        additional_runs = np.zeros(self._k, dtype=np.float)
+        additional_runs = np.zeros(self._k, dtype='float')
         more_alloc = True
         
         #do i need to use the more alloc or can i just use mask?
