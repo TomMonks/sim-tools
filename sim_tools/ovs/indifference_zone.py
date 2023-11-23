@@ -1,23 +1,24 @@
-'''
+"""
 Contains algorithms for Optimisation via Simulation
 with an indifference zone framework (fixed precision optimisation)
 
 1. KN - (Kim-Nelson) sequential Ranking and Selection Algorithm
 
-2. KNPlusPlus - Kim and Nelson updated their original KN procedure to 
-update the variance estimate of designs at each stage.  
+2. KNPlusPlus - Kim and Nelson updated their original KN procedure to
+update the variance estimate of designs at each stage.
 
-'''
+"""
 
 import numpy as np
 
-# from .toy_models import (BanditCasino,    
-#                          GaussianBandit, 
-#                          gaussian_bandit_sequence, 
+# from .toy_models import (BanditCasino,
+#                          GaussianBandit,
+#                          gaussian_bandit_sequence,
 #                          gaussian_sequence_model)
 
+
 class KNPlusPlus(object):
-    '''
+    """
     KN++ algorithm for Ranking and Selection
 
     More coordiation than KN. V
@@ -25,11 +26,12 @@ class KNPlusPlus(object):
 
     References.
     http://users.iems.northwestern.edu/~nelsonb/Publications/17KimNelson.pdf
-    https://www2.isye.gatech.edu/~skim/KimNelson.pdf 
+    https://www2.isye.gatech.edu/~skim/KimNelson.pdf
 
-    '''
-    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj='max'):
-        '''
+    """
+
+    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj="max"):
+        """
         Constructor method for KN++  Ranking and Selection Procedure.
 
         Reference = 'TO ADD'
@@ -37,38 +39,38 @@ class KNPlusPlus(object):
         Parameters:
         ----------
 
-        model - object, simulation model that implements 
+        model - object, simulation model that implements
         method simulate(design, replications)
 
         n_designs - int, the number of designs (k)
 
         delta - float, the indifference zone
 
-        alpha - float, between 0 and 1.  Used to calculate the 1-alpha 
+        alpha - float, between 0 and 1.  Used to calculate the 1-alpha
         probability of correct selection
 
         n_0 - int, the number of initial observations (default = 2)
-        
+
         obj - str, objective 'max' or 'min' (default='max)
 
-        '''
+        """
         model.register_observer(self)
         self._env = model
 
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
 
-        #sample variances for each design
+        # sample variances for each design
         self._vars = np.zeros(n_designs, np.float64)
-        #used for calculating running sample variance
+        # used for calculating running sample variance
         self._sq = np.zeros(n_designs, np.float64)
 
-        #should I also be storing the variances of the differences?
+        # should I also be storing the variances of the differences?
 
         self._k = n_designs
 
-        #set of non-eliminated systems
-        #designs are screened at each stage and removed.
+        # set of non-eliminated systems
+        # designs are screened at each stage and removed.
         self._contenders = np.arange(self._k)
 
         self._delta = delta
@@ -76,28 +78,32 @@ class KNPlusPlus(object):
         self._n_0 = n_0
         self._r = 0
 
-        types = ['min', 'max']
+        types = ["min", "max"]
         if obj not in types:
-            raise ValueError('obj parameter must be min or max')
+            raise ValueError("obj parameter must be min or max")
 
-        #code set up for max negate for min.
-        if obj == 'max':
+        # code set up for max negate for min.
+        if obj == "max":
             self._negate = 1.0
         else:
             self._negate = -1.0
 
         self._obj = obj
 
-
     def _calculate_eta(self):
-        return 0.5 * (np.power(2 * (1 - np.power((1 - self._alpha), 1 / (self._k - 1))), -2/(self._n-1)) - 1)
+        return 0.5 * (
+            np.power(
+                2 * (1 - np.power((1 - self._alpha), 1 / (self._k - 1))),
+                -2 / (self._n - 1),
+            )
+            - 1
+        )
 
     def __str__(self):
         return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0}, obj={self._obj})"
 
     def reset(self):
-        '''Resets all attributes
-        '''
+        """Resets all attributes"""
         self._total_reward = 0
         self._allocations = np.zeros(self._k, np.int32)
         self._means = np.zeros(self._k, np.float64)
@@ -108,10 +114,8 @@ class KNPlusPlus(object):
         self._sq = np.zeros(self._k, np.float64)
         self._n = 0
 
-
     def solve(self):
-        '''Run KN++
-        '''
+        """Run KN++"""
         self.reset()
         self._initialisation()
 
@@ -119,16 +123,16 @@ class KNPlusPlus(object):
             self._screening()
             self._sequential_replication()
             self._update()
-            
+
         return self._contenders
 
-    def _initialisation(self):  
-        '''
+    def _initialisation(self):
+        """
         Initialise KN++
-        
+
         Estimate initial sample means and variances of the differences
 
-        '''      
+        """
         for observation in range(self._n_0):
             self._sequential_replication()
 
@@ -136,100 +140,97 @@ class KNPlusPlus(object):
         self._h_squared = 2 * self._eta * (self._n - 1)
 
     def _stopping(self):
-        '''
+        """
         If |I| = 1 then stop (and select the system whose index is in I)
         else take one further sample from each system
 
-        '''
+        """
         if len(self._contenders) == 1:
             return True
-        
+
         return False
-                
-    
+
     def _sequential_replication(self):
-        '''
+        """
         Run a single replication of each
         design
-        '''
+        """
         for design in self._contenders:
             self._env.simulate(design)
-        
+
         self._n += 1
 
     def _screening(self):
-        '''
-        Loop through remaining contenders and screen if 
+        """
+        Loop through remaining contenders and screen if
         mean(design_i) < mean(design_j) - epsilon_ij
 
-        where epsilon_ij (w_ij in some papers) determines how far the sample mean 
+        where epsilon_ij (w_ij in some papers) determines how far the sample mean
         from system i can drop below the sample mean of system j without being eliminated.
-        '''
+        """
         self._contenders_old = np.asarray(self._contenders).copy()
         contenders_mask = np.full(self._contenders.shape, True, dtype=bool)
-                  
-        #inefficient way to code this...will update to pure numpy at some stage
+
+        # inefficient way to code this...will update to pure numpy at some stage
 
         for i in range(len(self._contenders_old)):
             for j in range(len(self._contenders_old)):
-
                 if i != j:
-                    design_i, design_j = self._contenders_old[i], self._contenders_old[j]
+                    design_i, design_j = (
+                        self._contenders_old[i],
+                        self._contenders_old[j],
+                    )
                     w_ij = self._elimination_distance(design_i, design_j)
 
                     if self._means[design_i] < self._means[design_j] - w_ij:
                         contenders_mask[i] = False
                         break
-               
+
         self._contenders = self._contenders[contenders_mask]
 
-
     def _mean_difference(self, design_i, design_j):
-        '''diff between two sample means
-        '''
+        """diff between two sample means"""
         mean_i = self._means[design_i]
         mean_j = self._means[design_j]
         return mean_i - mean_j
-       
 
     def _elimination_distance(self, design_i, design_j):
-        '''
+        """
         Returns the distance mean(design_i) can fall below mean(design_j)
         before it is ELIMINATED.
 
         Parameters:
         -----
         design_i - int, the index of the first design
-        
+
         design_j - int, the index of the second design
 
         Returns:
         --------
-        float. 
-        '''
-        #sample variances
+        float.
+        """
+        # sample variances
         var_i = self._vars[design_i]
         var_j = self._vars[design_j]
         sum_of_vars = var_i + var_j
 
-        #I think the problem is that I am not using the variance of the differences.
-        w_ij = (self._delta / (2 * self._n)) \
-            * (((self._h_squared * (sum_of_vars)) / self._delta**2) - self._n)
+        # I think the problem is that I am not using the variance of the differences.
+        w_ij = (self._delta / (2 * self._n)) * (
+            ((self._h_squared * (sum_of_vars)) / self._delta**2) - self._n
+        )
 
-        #return max(0, w_ij)
+        # return max(0, w_ij)
         return w_ij
 
-
     def _update(self):
-        '''update step.
+        """update step.
         Recaulcate eta and h_squared
-        '''
+        """
         self._eta = self._calculate_eta()
         self._h_squared = 2 * self._eta * (self._n - 1)
 
-
     def feedback(self, *args, **kwargs):
-        '''
+        """
         Feedback from the simulated environment
         Recieves an observation from the system
 
@@ -242,17 +243,16 @@ class KNPlusPlus(object):
 
         *kwargs -- dict of keyword arguments
 
-        '''
+        """
         design_index = args[1]
         observation = args[2]
-        self._allocations[design_index] += 1 
-                
-        #update running mean and standard deviation of the design
+        self._allocations[design_index] += 1
+
+        # update running mean and standard deviation of the design
         self._update_sample_estimates(design_index, observation)
-        
 
     def _update_sample_estimates(self, design_index, observation):
-        '''
+        """
         Updates the running sample mean and var of the design
 
         Parameters:
@@ -260,49 +260,48 @@ class KNPlusPlus(object):
         design_index -- int, index of the array to update
 
         observation -- float, observation recieved from the last replication
-        '''
+        """
         n = self._allocations[design_index]
         current_mean = self._means[design_index]
-        new_mean = ((n - 1) / float(n)) * current_mean + (1 / float(n)) * observation * self._negate
+        new_mean = ((n - 1) / float(n)) * current_mean + (
+            1 / float(n)
+        ) * observation * self._negate
 
         if n > 1:
-            self._sq[design_index] += (observation - abs(current_mean)) * (observation - abs(new_mean))
+            self._sq[design_index] += (observation - abs(current_mean)) * (
+                observation - abs(new_mean)
+            )
             self._vars[design_index] = self._sq[design_index] / (n - 1)
 
-        self._means[design_index] = new_mean    
-
-    
-
-    
-
+        self._means[design_index] = new_mean
 
 
 class KN(object):
-    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj='max'):
-        '''
+    def __init__(self, model, n_designs, delta, alpha=0.05, n_0=2, obj="max"):
+        """
         Constructor method for KN  Ranking and Selection Procedure.
 
         This works well for up to 20 competing designs
 
-        References. 
+        References.
         http://users.iems.northwestern.edu/~nelsonb/Publications/KimNelsonKN.pdf
 
         Parameters:
         ----------
 
-        model - object, simulation model that implements 
+        model - object, simulation model that implements
         method simulate(design, replications)
 
         n_designs - int, the number of designs (k)
 
         delta - float, the indifference zone
 
-        alpha - float, between 0 and 1.  Used to calculate the 1-alpha 
+        alpha - float, between 0 and 1.  Used to calculate the 1-alpha
         probability of correct selection
 
         n_0 - int, the number of initial observations (default = 2)
 
-        '''
+        """
         model.register_observer(self)
         self._env = model
 
@@ -310,33 +309,34 @@ class KN(object):
         self._allocations = np.zeros(n_designs, np.int32)
         self._means = np.zeros(n_designs, np.float64)
         self._init_obs = np.zeros((n_designs, n_0), np.float64)
-        
+
         self._k = n_designs
 
-        #the set of non-eliminated systems I
+        # the set of non-eliminated systems I
         self._contenders = np.arange(self._k)
 
         self._delta = delta
         self._alpha = alpha
         self._n_0 = n_0
-        
-        #number of replications that has been run.
+
+        # number of replications that has been run.
         self._r = 0
 
-        self._eta = 0.5 * (np.power((2 * alpha) / (self._k - 1), -2/(self._n_0-1)) - 1)
+        self._eta = 0.5 * (
+            np.power((2 * alpha) / (self._k - 1), -2 / (self._n_0 - 1)) - 1
+        )
 
-        types = ['min', 'max']
+        types = ["min", "max"]
         if obj not in types:
-            raise ValueError('obj parameter must be min or max')
+            raise ValueError("obj parameter must be min or max")
 
-        #code set up for max negate for min.
-        if obj == 'max':
+        # code set up for max negate for min.
+        if obj == "max":
             self._negate = 1.0
         else:
             self._negate = -1.0
 
         self._obj = obj
-
 
     def __str__(self):
         return f"KN(n_designs={self._k}, delta={self._delta}, alpha={self._alpha}, n_0={self._n_0}, obj={self._obj})"
@@ -349,10 +349,9 @@ class KN(object):
         self._init_obs = np.zeros((self._k, self._n_0), np.float64)
         self._contenders = np.arange(self._k)
         self._r = 0
-    
+
     def solve(self):
-        '''Run procedure KN
-        '''
+        """Run procedure KN"""
         self.reset()
         self._initialisation()
 
@@ -362,53 +361,54 @@ class KN(object):
 
         return self._contenders
 
-    def _initialisation(self):  
-        '''
+    def _initialisation(self):
+        """
         Initialise KN
-        
+
         Estimate initial sample means and variances of the differences
 
-        '''      
+        """
         self._h_squared = 2 * self._eta * (self._n_0 - 1)
-        
+
         for observation in range(self._n_0):
             self._sequential_replication()
-                
+
         self._variance_of_diffs = self._calc_variance_of_differences()
 
     def _sequential_replication(self):
         for design in self._contenders:
             self._env.simulate(design)
-        
+
         self._r += 1
 
     def _calc_variance_of_differences(self):
         pairwise_diffs = self._init_obs[:, None] - self._init_obs
         variance_of_diffs = pairwise_diffs.var(axis=-1, ddof=1)
-        #flattens array and drops differences with same design
-        return variance_of_diffs[~np.eye(variance_of_diffs.shape[0],dtype=bool)]
+        # flattens array and drops differences with same design
+        return variance_of_diffs[~np.eye(variance_of_diffs.shape[0], dtype=bool)]
 
-    #need to check if this is correct...
-    #possibly a bug.  Works when in designs are ordered, but not otherwise...
-    #think this is fixed 28/02/2020 TM - to double check.
+    # need to check if this is correct...
+    # possibly a bug.  Works when in designs are ordered, but not otherwise...
+    # think this is fixed 28/02/2020 TM - to double check.
     def _screening(self):
         self._contenders_old = np.asarray(self._contenders).copy()
         contenders_mask = np.full(self._contenders.shape, True, dtype=bool)
-        #terrible way to code this...!
+        # terrible way to code this...!
 
-        #designs in contention for this round
+        # designs in contention for this round
         for i in range(len(self._contenders_old)):
             for l in range(len(self._contenders_old)):
                 if i != l:
-                    design_i, design_l = self._contenders_old[i], self._contenders_old[l]
+                    design_i, design_l = (
+                        self._contenders_old[i],
+                        self._contenders_old[l],
+                    )
 
                     if not self._design_still_in_contention(design_i, design_l):
                         contenders_mask[i] = False
                         break
-                
 
         self._contenders = self._contenders[contenders_mask]
-
 
     def _design_still_in_contention(self, design_i, design_l):
         w_il = self._limit_to_distance_from_sample_means(design_i, design_l)
@@ -419,33 +419,35 @@ class KN(object):
         return mean_i >= mean_l - w_il
 
     def _limit_to_distance_from_sample_means(self, design_i, design_l):
-        '''
-        calculates W_li(r), 
-        which determines how far the sample mean from system i can 
+        """
+        calculates W_li(r),
+        which determines how far the sample mean from system i can
         drop below the sample means of system l without being eliminated
-        '''
-        #note - variance_of_diffs is a flat array for all comparisons and
-        #requires this formaula to look up the value.
+        """
+        # note - variance_of_diffs is a flat array for all comparisons and
+        # requires this formaula to look up the value.
         index = design_i * (self._k - 1) + (design_l - 1)
 
-        w_il = (self._delta / (2 * self._r)) \
-            * (((self._h_squared * self._variance_of_diffs[index]) / self._delta**2) - self._r)
-        
+        w_il = (self._delta / (2 * self._r)) * (
+            ((self._h_squared * self._variance_of_diffs[index]) / self._delta**2)
+            - self._r
+        )
+
         return max(0, w_il)
 
     def _stopping(self):
-        '''
+        """
         If |I| = 1 then stop (and select the system whose index is in I)
         else take one further sample from each system
 
-        '''
+        """
         if len(self._contenders) == 1:
             return True
-        
+
         return False
 
     def feedback(self, *args, **kwargs):
-        '''
+        """
         Feedback from the environment
         Recieves a reward and updates understanding
         of an arm
@@ -460,18 +462,18 @@ class KN(object):
         *kwards -- dict of keyword arguments:
                    None expected!
 
-        '''
+        """
         design_index = args[1]
         observation = args[2]
-        self._allocations[design_index] +=1 
-        self._means[design_index] = self.updated_mean_estimate(design_index, observation)
+        self._allocations[design_index] += 1
+        self._means[design_index] = self.updated_mean_estimate(
+            design_index, observation
+        )
         if self._r < self._n_0:
             self._init_obs[design_index][self._r] = observation
-        
-        
-        
+
     def updated_mean_estimate(self, design_index, observation):
-        '''
+        """
         Calculate the new running average of the design
 
         Keyword arguments:
@@ -482,16 +484,10 @@ class KN(object):
         Returns:
         ------
         float, the new mean estimate for the selected arm
-        '''
+        """
         n = self._allocations[design_index]
         current_value = self._means[design_index]
-        new_value = ((n - 1) / float(n)) * current_value + (1 / float(n)) * observation * self._negate
-        return new_value 
-
-    
-
-
-
-
-
-
+        new_value = ((n - 1) / float(n)) * current_value + (
+            1 / float(n)
+        ) * observation * self._negate
+        return new_value
