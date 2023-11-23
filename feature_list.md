@@ -1,6 +1,5 @@
 # sim-tools feature list
 
-
 module: distributions
 
 * Triangular
@@ -27,4 +26,29 @@ module: warm-up
 
 
 module: results visualisation
-**Standard ways to compare scenarios?
+** Standard ways to compare scenarios?
+
+## Road map
+
+### v0.3.0
+
+Test with Python 3.10 and 3.11
+Simpy 4.1.1
+
+module: distributions
+
+* Triangular
+* Exponential
+* Log normal
+* Normal
+* Gamma
+* Empirical
+* Fixed
+* Combination
+
+### v0.4.0
+
+module: distributions
+
+* Empirical
+* NSPP via thinning
