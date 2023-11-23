@@ -12,7 +12,6 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sim-tools",
-    #there must be an way to auto tick up the version number...
     version=__version__,
     author="Thomas Monks",
     author_email="t.m.w.monks@exeter.ac.uk",
@@ -20,7 +19,7 @@ setuptools.setup(
     description="Simulation Tools for Education and Practice",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/TomMonks/ovs-tutorial",
+    url="https://github.com/TomMonks/sim-tools",
     packages=setuptools.find_packages(),
     #if true look in MANIFEST.in for data files to include
     include_package_data=False,
@@ -28,12 +27,11 @@ setuptools.setup(
     #package_data={"test_package": ["data/*.csv"]},
     #these are for documentation 
     classifiers=[
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6.9',
+    python_requires='>=3.10',
     install_requires=requirements,
 )

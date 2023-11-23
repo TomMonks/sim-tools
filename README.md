@@ -4,7 +4,8 @@
 [![DOI](https://zenodo.org/badge/225608065.svg)](https://zenodo.org/badge/latestdoi/225608065)
 [![PyPI version fury.io](https://badge.fury.io/py/sim-tools.svg)](https://pypi.python.org/pypi/sim-tools/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360+/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-360+/)
+[![License: MIT](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
 
 sim-tools is being developed to support simulation education and applied simulation research.  It is MIT licensed and freely available to practitioners, students and researchers via PyPi.  There is a longer term plan to make sim-tools available via conda-forge.
 
@@ -17,6 +18,7 @@ sim-tools is being developed to support simulation education and applied simulat
 # Features:
 
 1. Implementation of classic optimisation via Simulation procedures such as KN, KN++, OBCA and OBCA-m
+2. Distributions module that includes classes that encapsulate a random number stream, seed, and distribution parameters.
 
 ## Two simple ways to explore sim-tools
 
@@ -53,6 +55,6 @@ Development environment:
 
 * `conda env create -f binder/environment.yml`
 
-* `conda activate sim_tools_dev`
+* `conda activate sim_tools`
 
 **All contributions are welcome!**
