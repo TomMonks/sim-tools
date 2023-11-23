@@ -5,6 +5,7 @@
 [![PyPI version fury.io](https://badge.fury.io/py/sim-tools.svg)](https://pypi.python.org/pypi/sim-tools/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-360+/)
+[![License: MIT](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
 
 sim-tools is being developed to support simulation education and applied simulation research.  It is MIT licensed and freely available to practitioners, students and researchers via PyPi.  There is a longer term plan to make sim-tools available via conda-forge.
 
