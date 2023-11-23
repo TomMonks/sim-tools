@@ -20,7 +20,7 @@ def test_normal():
     assert type(d.sample()) == float
 
 def test_uniform():
-    d = dists.Uniform(10, 1, random_seed=SEED_1)
+    d = dists.Uniform(1, 10, random_seed=SEED_1)
     assert type(d.sample()) == float
 
 def test_tri():
