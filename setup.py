@@ -1,5 +1,9 @@
 import setuptools
-from sim_tools import __version__
+
+# patch ed - build error due to imporing numpy into __init__
+# from sim_tools import __version__
+VERSION = "0.2.1"
+
 
 # Read in the requirements.txt file
 with open("requirements.txt") as f:
@@ -12,7 +16,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sim-tools",
-    version=__version__,
+    version=VERSION,
     author="Thomas Monks",
     author_email="t.m.w.monks@exeter.ac.uk",
     license="The MIT License (MIT)",
