@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 import math
 import numpy as np
 
+from typing import Optional
+
 
 class Distribution(ABC):
     """
@@ -16,11 +18,11 @@ class Distribution(ABC):
     All distributions derived from it.
     """
 
-    def __init__(self, random_seed=None):
+    def __init__(self, random_seed: Optional[int] = None):
         self.rng = np.random.default_rng(random_seed)
 
     @abstractmethod
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the distribution
 
@@ -32,7 +34,7 @@ class Distribution(ABC):
 
         Returns:
         -------
-        np.array or scalar
+        np.ndarray or scalar
         """
         pass
 
@@ -43,7 +45,7 @@ class Exponential(Distribution):
     packages up distribution parameters, seed and random generator.
     """
 
-    def __init__(self, mean, random_seed=None):
+    def __init__(self, mean: float, random_seed: Optional[int] = None):
         """
         Constructor
 
@@ -59,7 +61,7 @@ class Exponential(Distribution):
         super().__init__(random_seed)
         self.mean = mean
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the exponential distribution
 
@@ -78,7 +80,7 @@ class Bernoulli(Distribution):
     packages up distribution parameters, seed and random generator.
     """
 
-    def __init__(self, p, random_seed=None):
+    def __init__(self, p: float, random_seed: Optional[int] = None):
         """
         Constructor
 
@@ -94,7 +96,7 @@ class Bernoulli(Distribution):
         super().__init__(random_seed)
         self.p = p
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the exponential distribution
 
@@ -112,7 +114,7 @@ class Lognormal(Distribution):
     Encapsulates a lognormal distirbution
     """
 
-    def __init__(self, mean, stdev, random_seed=None):
+    def __init__(self, mean: float, stdev: float, random_seed: Optional[int] = None):
         """
         Params:
         -------
@@ -153,11 +155,11 @@ class Lognormal(Distribution):
         sigma = math.sqrt(math.log(phi**2 / m**2))
         return mu, sigma
 
-    def sample(self):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample from the normal distribution
         """
-        return self.rng.lognormal(self.mu, self.sigma)
+        return self.rng.lognormal(self.mu, self.sigma, size=size)
 
 
 class Normal(Distribution):
@@ -169,7 +171,13 @@ class Normal(Distribution):
 
     """
 
-    def __init__(self, mean, sigma, allow_neg=True, random_seed=None):
+    def __init__(
+        self,
+        mean: float,
+        sigma: float,
+        allow_neg: Optional[bool] = True,
+        random_seed: Optional[int] = None,
+    ):
         """
         Constructor
 
@@ -194,7 +202,7 @@ class Normal(Distribution):
         self.sigma = sigma
         self.allow_neg = allow_neg
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the normal distribution
 
@@ -227,7 +235,9 @@ class Uniform(Distribution):
     packages up distribution parameters, seed and random generator.
     """
 
-    def __init__(self, low, high, random_seed=None):
+    def __init__(
+        self, low: float, high: float, random_seed: Optional[int] = None
+    ) -> float | np.ndarray:
         """
         Constructor
 
@@ -247,7 +257,7 @@ class Uniform(Distribution):
         self.low = low
         self.high = high
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the uniform distribution
 
@@ -266,13 +276,15 @@ class Triangular(Distribution):
     packages up distribution parameters, seed and random generator.
     """
 
-    def __init__(self, low, mode, high, random_seed=None):
+    def __init__(
+        self, low: float, mode: float, high: float, random_seed: Optional[int] = None
+    ) -> float | np.ndarray:
         super().__init__(random_seed)
         self.low = low
         self.high = high
         self.mode = mode
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         return self.rng.triangular(self.low, self.mode, self.high, size=size)
 
 
@@ -282,10 +294,10 @@ class FixedDistribution(Distribution):
     of a fixed value.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: float):
         self.value = value
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Generate a sample from the fixed distribution
 
@@ -306,18 +318,25 @@ class CombinationDistribution(Distribution):
     Simple summation of samples from multiple distributions.
     """
 
-    def __init__(self, *dists):
+    def __init__(self, *dists: Distribution):
         self.dists = dists
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
+        """
+        Sample from the combination distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            the number of samples to return.  If size=None then a single
+            sample is returned.
+
+        Returns:
+        -------
+        np.ndarray or scalar
+        """
         total = 0.0 if size is None else np.zeros(size)
 
         for dist in self.dists:
             total += dist.sample(size)
         return total
-
-
-if __name__ == "__main__":
-    n = Normal(0, 1, allow_neg=False)
-    samples = n.sample(10)
-    print(samples)
