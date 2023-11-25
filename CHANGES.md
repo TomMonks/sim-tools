@@ -4,6 +4,7 @@
 
 * Distributions classes now have python type hints
 * Added distributions example notebook.
+* Added `datasets` module and function to load example NSPP dataset.
 
 ## v0.2.0
 
