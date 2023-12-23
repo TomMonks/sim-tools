@@ -10,6 +10,7 @@ import math
 import numpy as np
 
 from typing import Optional
+import numpy.typing as npt
 
 
 class Distribution(ABC):
@@ -340,3 +341,97 @@ class CombinationDistribution(Distribution):
         for dist in self.dists:
             total += dist.sample(size)
         return total
+
+
+class ContinuousEmpirical(Distribution):
+    """
+    Continuous Empirical Distribution.
+
+    Linear interpolation between upper and lower
+    bounds of a discrete distribution
+    """
+
+    def __init__(
+        self,
+        lower_bounds: npt.ArrayLike,
+        upper_bounds: npt.ArrayLike,
+        freq: npt.ArrayLike,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Continuous Empirical Distribution.
+
+        Params:
+        ------
+        lower_bounds: array-like
+            Lower bounds of a discrete empirical distribution
+
+        upper_bounds: array-like
+            Upper bounds of a discrete empirical distribution
+
+        freq: array-like
+            Frequency of observations between bounds
+
+        random_seed: int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+
+        """
+        self.lower_bounds = np.asarray(lower_bounds)
+        self.upper_bounds = np.asarray(upper_bounds)
+        self.cumulative_probs = self.create_cumulative_probs(freq)
+        self.rng = np.random.default_rng(random_seed)
+
+    def create_cumulative_probs(self, freq: npt.ArrayLike) -> npt.NDArray[float]:
+        """
+        Calculate cumulative relative frequency from
+        frequency
+
+        Params:
+        ------
+        freq: array-like
+            frequency distribution
+
+        Returns:
+        --------
+        np.ndarray
+            Cumulative relative frequency.
+        """
+        freq = np.asarray(freq)
+        return np.cumsum(freq / freq.sum())
+
+    @abstractmethod
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
+        """
+        Sample fron the Continuous Empirical Distirbution
+        function.
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        if size is None:
+            size = 1
+
+        samples = []
+        for i in range(size):
+            # Sample a value U from the uniform(0, 1) distribution
+            U = self.rng.random()
+
+            # Obtain lower and upper bounds of a sample from the discrete empirical distribution
+            idx = np.searchsorted(self.cumulative_probs, U)
+            lb, ub = self.lower_bounds[idx], self.upper_bounds[idx]
+
+            # Use linear interpolation of U between the lower and upper bound to obtain a continuous value
+            continuous_value = lb + (ub - lb) * (U - self.cumulative_probs[idx - 1]) / (
+                self.cumulative_probs[idx] - self.cumulative_probs[idx - 1]
+            )
+
+            samples.append(continuous_value)
+
+        if size == 1:
+            return samples[0]
+        else:
+            return np.asarray(samples)
