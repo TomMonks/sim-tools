@@ -402,7 +402,7 @@ class ContinuousEmpirical(Distribution):
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
-        Sample fron the Continuous Empirical Distirbution
+        Sample fron the Continuous Empirical Distribution
         function.
 
         Params:
@@ -434,3 +434,77 @@ class ContinuousEmpirical(Distribution):
             return samples[0]
         else:
             return np.asarray(samples)
+
+
+class Erlang:
+    """
+    Erlang distribution
+
+    Implemented to allow for users to input the mean,
+    and stdev of the distribution as opposed to k and theta.
+
+    Mean and stdev are convered to k and theta internally.
+
+    The Erlang is a special case of the gamma distribution where
+    k is an integer.  Internally this is implemented using
+    numpy Generators gamma method.  As k is calculated from the mean
+    and stdev it is rounded to an integer value using python's
+    built in 'round' function.
+
+    Optionally a user can offet the original of the distribution
+    using the location parameter.
+
+    Sources:
+    -------
+    convert between mean+stdev to k+theta:
+    https://www.statisticshowto.com/erlang-distribution/
+    """
+
+    def __init__(
+        self,
+        mean: float,
+        stdev: float,
+        location: Optional[float] = 0.0,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Consructor method
+
+        Params:
+        -------
+        mean: float
+            Mean of the Erlang
+
+        stdev: float
+            Standard deviation of the Erlang distribution
+
+        location: float, optional (default=0.0)
+            Offset the original of the distribution i.e.
+            the returned value = sample[Erlang] + location
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        self.mean = mean
+        self.stdev = stdev
+        self.location = location
+        self.rng = np.random.default_rng(random_seed)
+
+        # k also referred to as shape
+        self.k = round((mean / stdev) ** 2)
+
+        # theta also referred to as scale
+        self.theta = mean / self.k
+
+    def sample(self, size=None):
+        """
+        Sample fron the Erlang distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.rng.gamma(self.k, self.theta, size) + self.location
