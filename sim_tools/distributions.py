@@ -508,3 +508,120 @@ class Erlang:
             numpy array returned.
         """
         return self.rng.gamma(self.k, self.theta, size) + self.location
+
+
+class Weibull(Distribution):
+    """
+    Weibull distribution
+
+    The Weibull takes shape (alpha) and scale (beta) parameters.  Both shape and scale
+    should be > 0. The higher the scale parameters the more variance in the samples.
+
+    This implementation also includes a third parameter "location"
+    (default = 0) to shift the distribution if a lower bound is needed.
+    """
+
+    def __init__(
+        self,
+        alpha: float,
+        beta: float,
+        location: Optional[int] = 0.0,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Three parameter Weibull distribution.
+
+        Params:
+        ------
+        alpha: float
+            The shape parameter.
+
+        beta: float:
+            The scale parameter.  The higher the scale parameters the
+            more variance in the samples
+
+        location: float, optional (default=None)
+            An offset from 0.0
+
+        Notes:
+        ------
+        Check that the mean and variance of the samples are as expected.
+
+        This is because it is easy to make mistakes when setting the shape
+        and scale parameters if converting from other notation.
+        For example:
+
+        In Law and Kelton, shape=alpha and scale=beta. But ->
+
+        Wikipedia defines shape=k and scale = lambda = 1/beta
+        https://en.wikipedia.org/wiki/Weibull_distribution
+
+        other sources define shape=beta and scale=eta (η)
+
+        In random.weibullvariate alpha=scale and beta=shape!
+        """
+
+        if alpha <= 0 or beta <= 0:
+            raise ValueError("alpha and beta must be > 0")
+
+        self.shape = alpha
+        self.scale = beta
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Erlang distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.scale * self.rng.weibull(self.shape, size)
+
+
+class Gamma:
+    '''
+    Gamma distribution
+
+    Gamma distribution set up to accept 
+    '''
+    def __init__(self, alpha, beta, location=0.0, random_seed=None):
+        self.k = alpha  # shape
+        self.theta = 1 / beta # scale
+        self.location = location
+        self.rng = np.random.default_rng(random_seed)
+
+    def mean(self):
+        return self.k * self.theta
+
+    def variance(self):
+        return self.k * (self.theta ** 2)
+
+    @staticmethod
+    def params_from_mean_and_var(mean, var):
+        '''
+        Helper static method to get alpha and beta parameters
+        from a mean and variance.
+
+        Params:
+        ------
+        mean: float
+            mean of the gamma distribution
+
+        var: float
+            variance of the gamma distribution
+
+        Returns:
+        -------
+        (float, float)
+        alpha, beta
+        
+        '''
+        alpha = mean **2 / var
+        beta = mean / var
+        return alpha, beta
+        
+    def sample(self, size=None):
+        return self.rng.gamma(self.k, self.theta, size) + location
