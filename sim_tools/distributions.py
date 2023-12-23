@@ -400,7 +400,6 @@ class ContinuousEmpirical(Distribution):
         freq = np.asarray(freq)
         return np.cumsum(freq / freq.sum())
 
-    @abstractmethod
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Continuous Empirical Distirbution
