@@ -581,7 +581,7 @@ class Weibull(Distribution):
         return self.scale * self.rng.weibull(self.shape, size)
 
 
-class Gamma:
+class Gamma(Distribution):
     """
     Gamma distribution
 
@@ -682,3 +682,71 @@ class Gamma:
             numpy array returned.
         """
         return self.rng.gamma(self.alpha, self.beta, size) + self.location
+
+
+class Beta(Distribution):
+    """
+    Beta distribution
+
+    As defined in  Simulation Modeling and Analysis (Law, 2007).
+
+    Accepts to shape parameters alpha1 and alpha2.
+    The beta distribution is [0, 1].
+    This can be rescaled using to [min, max] using
+    min + (max - min) * sample(Beta)
+
+    Common uses:
+    -----------
+    1. Useful as a rough model in the absence data
+    2. Distribution of a random proportion
+    3. Time to complete a task.
+    """
+
+    def __init__(
+        self,
+        alpha1: float,
+        alpha2: float,
+        min: Optional[float] = 0.0,
+        max: Optional[float] = 1.0,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Beta distribution
+
+        Params:
+        -------
+        alpha1: float
+            shape parameter 1
+
+        alpha2: float
+            shape parameter 2
+
+        min: float, optional (default=0.0)
+            Used with max to rescale [0,1] to [min, max]
+
+        max: float, optional (default=1.0)
+            Used with max to rescale [0,1] to [min, max]
+
+        random_seed: int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        self.alpha1 = alpha1
+        self.alpha2 = alpha2
+        self.min = min
+        self.max = max
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Beta distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return (self.min + (self.max - self.min)) * np.random.beta(
+            self.alpha1, self.alpha2, size
+        )
