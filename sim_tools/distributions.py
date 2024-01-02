@@ -750,3 +750,58 @@ class Beta(Distribution):
         return (self.min + (self.max - self.min)) * np.random.beta(
             self.alpha1, self.alpha2, size
         )
+
+
+class Discrete(Distribution):
+    """
+    Discrete distribution
+
+    Sample a value with a given observed frequency.
+
+    Example uses:
+    -------------
+    1. routing percentages
+    2. classes of entity
+    3. batch sizes of arrivals
+    """
+
+    def __init__(
+        self,
+        values: npt.ArrayLike,
+        freq: npt.ArrayLike,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Discrete distribution
+
+        Params:
+        ------
+        values: array-like
+            list of sample values. Must be of equal length to freq
+
+        freq: array-like
+            list of observed frequencies. Must be of equal length to values
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        if len(values) != len(freq):
+            raise ValueError("values and freq arguments must be of equal length")
+
+        self.values = np.asarray(values)
+        self.freq = np.asarray(freq)
+        self.probabilities = self.freq / self.freq.sum()
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Discrete distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.rng.choice(self.values, p=self.probabilities, size=size)
