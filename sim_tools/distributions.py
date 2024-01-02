@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import math
 import numpy as np
 
-from typing import Optional
+from typing import Optional, Tuple
 import numpy.typing as npt
 
 
@@ -582,22 +582,27 @@ class Weibull(Distribution):
 
 
 class Gamma:
-    '''
+    """
     Gamma distribution
 
     Gamma distribution set up to accept alpha (scale) and beta (shape)
-    parameters as described in Law (2007).  
+    parameters as described in Law (2007).
 
     Also contains functions to compute mean, variance, and a static method
     to computer alpha and beta from specified mean and variance.
-    
-    '''
-    def __init__(self, alpha: float, beta: float, 
-                 location: Optional[float] = 0.0, 
-                 random_seed: Optional[int] = None):
-        '''
+
+    """
+
+    def __init__(
+        self,
+        alpha: float,
+        beta: float,
+        location: Optional[float] = 0.0,
+        random_seed: Optional[int] = None,
+    ):
+        """
         Gamma distribution
-        
+
         Params:
         ------
         alpha: float. Must be > 0
@@ -612,39 +617,39 @@ class Gamma:
         random_seed: int, optional (default=None)
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
-                    
-        '''
+
+        """
         if alpha <= 0 or beta <= 0:
             raise ValueError("alpha and beta must be > 0")
-        
+
         self.alpha = alpha  # shape
-        self.beta =  beta # scale
+        self.beta = beta  # scale
         self.location = location
         self.rng = np.random.default_rng(random_seed)
 
     def mean(self) -> float:
-        '''
+        """
         The computed mean of the gamma distribution
 
         Returns:
         -------
         float
-        '''
+        """
         return self.alpha * self.beta
 
     def variance(self) -> float:
-        '''
+        """
         The computed varaince of the gamma distribution
 
         Returns:
         -------
         float
-        '''
-        return self.alpha * (self.beta ** 2)
+        """
+        return self.alpha * (self.beta**2)
 
     @staticmethod
     def params_from_mean_and_var(mean: float, var: float) -> Tuple[float, float]:
-        '''
+        """
         Helper static method to get alpha and beta parameters
         from a mean and variance.
 
@@ -660,12 +665,12 @@ class Gamma:
         -------
         (float, float)
         alpha, beta
-        
-        '''
-        alpha = mean **2 / var
+
+        """
+        alpha = mean**2 / var
         beta = mean / var
         return alpha, beta
-        
+
     def sample(self, size: Optional[int] = None):
         """
         Sample fron the Gamma distribution
@@ -677,5 +682,3 @@ class Gamma:
             numpy array returned.
         """
         return self.rng.gamma(self.alpha, self.beta, size) + self.location
-
-        
