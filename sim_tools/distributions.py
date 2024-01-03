@@ -747,9 +747,9 @@ class Beta(Distribution):
             Number of samples to return. If integer then
             numpy array returned.
         """
-        return self.min + ((self.max - self.min) * self.rng.beta(
-            self.alpha1, self.alpha2, size
-        ))
+        return self.min + (
+            (self.max - self.min) * self.rng.beta(self.alpha1, self.alpha2, size)
+        )
 
 
 class Discrete(Distribution):
@@ -806,8 +806,9 @@ class Discrete(Distribution):
         """
         return self.rng.choice(self.values, p=self.probabilities, size=size)
 
+
 class TruncatedDistribution(Distribution):
-    '''
+    """
     Truncated Distribution
 
     Pass in any distribution class and this class
@@ -815,11 +816,9 @@ class TruncatedDistribution(Distribution):
 
     No resampling is done the class simply returns
     the maximum value.
-    '''
-    
-    def __init__(self, 
-                 dist_to_truncate: Distribution, 
-                 lower_bound: float):
+    """
+
+    def __init__(self, dist_to_truncate: Distribution, lower_bound: float):
         """
         Truncated distribution
 
@@ -846,7 +845,7 @@ class TruncatedDistribution(Distribution):
             numpy array returned.
         """
         if size is not None:
-            samples =  self.dist.sample(size)
+            samples = self.dist.sample(size)
             samples[samples < self.lower_bound] = self.lower_bound
             return samples
 
@@ -854,8 +853,9 @@ class TruncatedDistribution(Distribution):
             sample = self.dist.sample()
             return max(self.lower_bound, sample)
 
+
 class RawEmpirical(Distribution):
-    '''
+    """
     Sample with replacement from a list of raw empirical values
 
     Useful if none of the theoretical distributions on offer fit the data
@@ -863,21 +863,22 @@ class RawEmpirical(Distribution):
     Notes:
     -----
     If sample size is small consider if upper and lower limits in raw data
-    are representative of the real world system.  
-    '''
+    are representative of the real world system.
+    """
+
     def __init__(self, values: npt.ArrayLike, random_seed: Optional[int] = None):
-        '''
+        """
         RawEmpirical
 
         Params:
         ------
         values: array-like
-            Empirical list of sample values 
+            Empirical list of sample values
 
         random_seed: int, optional (default=None)
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
-        '''
+        """
         self.values = np.asarray(values)
         self.rng = np.random.default_rng(random_seed)
 
