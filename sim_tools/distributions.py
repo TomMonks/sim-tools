@@ -1083,3 +1083,103 @@ class PearsonVI:
         # Pearson6(a1,a2,b)=b∗X/(1−X), where X=Beta(a1,a2,1)
         X = self.rng.beta(self.alpha1, self.alpha2, size)
         return self.beta * X / (1 - X)
+
+
+from typing import Optional
+
+class ErlangK(Distribution):
+    """
+    Erlang distribution where k and theta are specified.
+
+    The Erlang is a special case of the gamma distribution where
+    k is a positive integer.  Internally this is implemented using
+    numpy Generators gamma method. 
+
+    Optionally a user can offet the original of the distribution
+    using the location parameter.
+    """
+
+    def __init__(
+        self,
+        k: int,
+        theta: float,
+        location: Optional[float] = 0.0,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        Constructor method
+
+        Params:
+        -------
+        k: integer
+            Mean of the Erlang
+
+        stdev: float
+            Standard deviation of the Erlang distribution
+
+        location: float, optional (default=0.0)
+            Offset the original of the distribution i.e.
+            the returned value = sample[Erlang] + location
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        if k < 0.0:
+            raise ValueError("k must be > 0")
+        
+        self.k = k
+        self.theta = theta
+        self.location = location
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Erlang distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.rng.gamma(self.k, self.theta, size) + self.location
+
+class Poisson(Distribution):
+    """
+    Poisson distribution
+
+    Used to simulate number of events that occur in an interval of time.
+    E.g. number of items in a batch.
+
+    Sources:
+    --------
+    [1]  Law (2007 pg. 308) Simulation modelling and analysis.
+    """
+    def __init__(self, rate: float, random_seed: Optional[int] = None):
+        '''
+        Poisson Distribution
+
+        Params:
+        -------
+        rate: float
+            Mean number of events in time period
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        '''
+        self.rate = rate
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Erlang distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.rng.poisson(self.rate, size)
