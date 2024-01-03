@@ -706,8 +706,8 @@ class Beta(Distribution):
         self,
         alpha1: float,
         alpha2: float,
-        min: Optional[float] = 0.0,
-        max: Optional[float] = 1.0,
+        lower_bound: Optional[float] = 0.0,
+        upper_bound: Optional[float] = 1.0,
         random_seed: Optional[int] = None,
     ):
         """
@@ -733,8 +733,8 @@ class Beta(Distribution):
         """
         self.alpha1 = alpha1
         self.alpha2 = alpha2
-        self.min = min
-        self.max = max
+        self.min = lower_bound
+        self.max = upper_bound
         self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None):
@@ -747,9 +747,9 @@ class Beta(Distribution):
             Number of samples to return. If integer then
             numpy array returned.
         """
-        return (self.min + (self.max - self.min)) * np.random.beta(
+        return self.min + ((self.max - self.min) * self.rng.beta(
             self.alpha1, self.alpha2, size
-        )
+        ))
 
 
 class Discrete(Distribution):
