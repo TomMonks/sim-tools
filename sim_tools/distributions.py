@@ -853,3 +853,42 @@ class TruncatedDistribution(Distribution):
         else:
             sample = self.dist.sample()
             return max(self.lower_bound, sample)
+
+class RawEmpirical(Distribution):
+    '''
+    Sample with replacement from a list of raw empirical values
+
+    Useful if none of the theoretical distributions on offer fit the data
+
+    Notes:
+    -----
+    If sample size is small consider if upper and lower limits in raw data
+    are representative of the real world system.  
+    '''
+    def __init__(self, values: npt.ArrayLike, random_seed: Optional[int] = None):
+        '''
+        RawEmpirical
+
+        Params:
+        ------
+        values: array-like
+            Empirical list of sample values 
+
+        random_seed: int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        '''
+        self.values = np.asarray(values)
+        self.rng = np.random.default_rng(random_seed)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample from the raw empirical data with replacement
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return self.rng.choice(self.values, size)
