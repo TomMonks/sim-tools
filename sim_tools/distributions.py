@@ -438,7 +438,7 @@ class ContinuousEmpirical(Distribution):
             return np.asarray(samples)
 
 
-class Erlang:
+class Erlang(Distribution):
     """
     Erlang distribution
 
