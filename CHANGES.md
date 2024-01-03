@@ -2,20 +2,23 @@
 
 ## v0.3.0
 
-* Distributions classes now have python type hints
+* Distributions classes now have python type hints.
 * Added distributions example notebook.
 * Added `datasets` module and function to load example NSPP dataset.
 * Distributions added
     * Erlang (mean and stdev parameters)
+    * ErlangK (k and theta parameters)
+    * Poisson
     * Beta
     * Gamma
     * Weibull
     * PearsonV
     * PearsonVI
-    * Discrete
+    * Discrete (values and observed frequency parameters)
     * ContinuousEmpirical (linear interpolation between groups)
     * RawEmpirical (resample with replacement from individual X's)
     * TruncatedDistribution (arbitrary truncation of any distribution)
+
 
 
 
