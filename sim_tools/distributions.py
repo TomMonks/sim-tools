@@ -419,11 +419,13 @@ class ContinuousEmpirical(Distribution):
             # Sample a value U from the uniform(0, 1) distribution
             U = self.rng.random()
 
-            # Obtain lower and upper bounds of a sample from the discrete empirical distribution
+            # Obtain lower and upper bounds of a sample from the
+            # discrete empirical distribution
             idx = np.searchsorted(self.cumulative_probs, U)
             lb, ub = self.lower_bounds[idx], self.upper_bounds[idx]
 
-            # Use linear interpolation of U between the lower and upper bound to obtain a continuous value
+            # Use linear interpolation of U between
+            # the lower and upper bound to obtain a continuous value
             continuous_value = lb + (ub - lb) * (U - self.cumulative_probs[idx - 1]) / (
                 self.cumulative_probs[idx] - self.cumulative_probs[idx - 1]
             )
@@ -893,3 +895,191 @@ class RawEmpirical(Distribution):
             numpy array returned.
         """
         return self.rng.choice(self.values, size)
+
+
+class PearsonV(Distribution):
+    """
+    The PearsonV(alpha, beta) is an inverse Gamma distribution.
+
+    Where alpha = shape, and beta = scale (> 0)
+
+    Law (2007, pg 293-294) defines the distribution as
+    PearsonV(alpha, beta) = 1/Gamma(alpha, 1/beta) and note that the
+    PDF is similar to that of lognormal, but has a larger spike
+    close to 0.  It can be used to model the time to complete a task.
+
+    For certain values of the shape parameter the mean and var can be
+    directly computed
+
+    mean = beta / (alpha - 1) for alpha > 1.0
+    var = beta^2 / (alpha - 1)^2 X (alpha - 2) fpr alpha > 2.0
+
+    Alternative Sources:
+    --------------------
+    [1] https://riskwiki.vosesoftware.com/PearsonType5distribution.php
+    [2] https://modelassist.epixanalytics.com/display/EA/Pearson+Type+5
+
+    sources last accessed 03/01/2024
+
+    Notes:
+    ------
+    A good R package for Pearson distributions is PearsonDS
+    https://www.rdocumentation.org/packages/PearsonDS/versions/1.3.0
+
+    """
+
+    def __init__(self, alpha: float, beta: float, random_seed: Optional[int] = None):
+        """
+        PearsonV
+
+        Params:
+        ------
+        alpha: float
+            Shape parameter. Must be > 0
+
+        beta: float
+            Scale parameter. Must be > 0
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        if alpha <= 0 or beta <= 0:
+            raise ValueError("alpha and beta must be > 0")
+        self.alpha = alpha  # shape
+        self.beta = beta  # scale
+        self.rng = np.random.default_rng(random_seed)
+
+    def mean(self) -> float:
+        """
+        Compute the mean of the PearsonV
+
+        If alpha <= 1.0 raises a ValueError
+        """
+        if self.alpha > 1.0:
+            return self.beta / (self.alpha - 1)
+        else:
+            msg = "Cannot directly compute mean when alpha <= 1.0"
+            raise ValueError(msg)
+
+    def var(self) -> float:
+        """
+        Compute the Variance of the PearsonV
+
+        If alpha <= 2.0 raises a ValueError
+        """
+        if self.alpha > 2.0:
+            return (self.beta**2) / (((self.alpha - 1) ** 2) * (self.alpha - 2))
+        else:
+            msg = "Cannot directly compute var when alpha <= 2.0"
+            raise ValueError(msg)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample from the PearsonV distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        return 1 / self.rng.gamma(self.alpha, 1 / self.beta, size)
+
+
+class PearsonVI:
+    """
+    The PearsonVI(alpha1, alpha2, beta) is an inverted beta distribution.
+
+    Where:
+
+    alpha1 = shape param 1, (> 0)
+    alpha2 = shape param 2 (> 0)
+    beta = scale (> 0)
+
+    Law (2007, pg 294-295) notes that PearsonVI
+    can be used to model the time to complete a task.
+
+    For certain values of the 2nd shape parameter the mean and var can be
+    directly computed. See functions mean() and var()
+
+    Sampling:
+    --------
+    Pearson6(a1,a2,b) = b*X / (1-X), where X=Beta(a1,a2)
+
+    Sources:
+    --------------------
+    [1] https://riskwiki.vosesoftware.com/PearsonType6distribution.php
+
+    sources last accessed 03/01/2024
+
+    Notes:
+    ------
+    A good R package for Pearson distributions is PearsonDS
+    https://www.rdocumentation.org/packages/PearsonDS/versions/1.3.0
+
+    """
+
+    def __init__(
+        self,
+        alpha1: float,
+        alpha2: float,
+        beta: float,
+        random_seed: Optional[int] = None,
+    ):
+        """
+        PerasonVI
+
+        Params:
+        -------
+        alpha1: float
+            Shape parameters 1. Must be > 0
+
+        alpha2: float
+            Shape parameter 2. Must be > 0
+
+        beta: float
+            scale parameters. Must be > 0
+
+        random_seed, int, optional (default=None)
+            A random seed to reproduce samples. If set to none then a unique
+            sample is created.
+        """
+        self.alpha1 = alpha1
+        self.alpha2 = alpha2
+        self.beta = beta
+        self.rng = np.random.default_rng(random_seed)
+
+    def mean(self) -> float:
+        if self.alpha2 > 1.0:
+            return (self.beta * self.alpha1) / (self.alpha2 - 1)
+        else:
+            raise ValueError("Cannot compute mean when alpha2 <= 1.0")
+
+    def var(self) -> float:
+        """
+        Compute the Variance of the PearsonV
+
+        If alpha2 <= 2.0 raises a ValueError
+        """
+        if self.alpha2 > 2.0:
+            return (
+                (self.beta**2) * self.alpha1 * (self.alpha1 + self.alpha2 - 1)
+            ) / (((self.alpha2 - 1) ** 2) * (self.alpha2 - 2))
+        else:
+            msg = "Cannot directly compute var when alpha2 <= 2.0"
+            raise ValueError(msg)
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample from the PearsonVI distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        # Pearson6(a1,a2,b)=b∗X/(1−X), where X=Beta(a1,a2,1)
+        X = self.rng.beta(self.alpha1, self.alpha2, size)
+        return self.beta * X / (1 - X)
