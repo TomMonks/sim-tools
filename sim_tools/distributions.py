@@ -805,3 +805,51 @@ class Discrete(Distribution):
             numpy array returned.
         """
         return self.rng.choice(self.values, p=self.probabilities, size=size)
+
+class TruncatedDistribution(Distribution):
+    '''
+    Truncated Distribution
+
+    Pass in any distribution class and this class
+    will tuncate the distribution at a lower bound.
+
+    No resampling is done the class simply returns
+    the maximum value.
+    '''
+    
+    def __init__(self, 
+                 dist_to_truncate: Distribution, 
+                 lower_bound: float):
+        """
+        Truncated distribution
+
+        Params:
+        -------
+
+        dist_to_truncate: Distribution
+            Any Distribution object that generates samples
+
+        lower_bound: float
+            Truncation point
+        """
+        self.dist = dist_to_truncate
+        self.lower_bound = lower_bound
+
+    def sample(self, size: Optional[int] = None):
+        """
+        Sample fron the Discrete distribution
+
+        Params:
+        -------
+        size: int, optional (default=None)
+            Number of samples to return. If integer then
+            numpy array returned.
+        """
+        if size is not None:
+            samples =  self.dist.sample(size)
+            samples[samples < self.lower_bound] = self.lower_bound
+            return samples
+
+        else:
+            sample = self.dist.sample()
+            return max(self.lower_bound, sample)
