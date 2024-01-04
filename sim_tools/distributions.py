@@ -499,7 +499,7 @@ class Erlang(Distribution):
         # theta also referred to as scale
         self.theta = mean / self.k
 
-    def sample(self, size=None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Erlang distribution
 
@@ -570,7 +570,7 @@ class Weibull(Distribution):
         self.scale = beta
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Erlang distribution
 
@@ -673,7 +673,7 @@ class Gamma(Distribution):
         beta = mean / var
         return alpha, beta
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Gamma distribution
 
@@ -739,7 +739,7 @@ class Beta(Distribution):
         self.max = upper_bound
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Beta distribution
 
@@ -796,7 +796,7 @@ class Discrete(Distribution):
         self.probabilities = self.freq / self.freq.sum()
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Discrete distribution
 
@@ -836,7 +836,7 @@ class TruncatedDistribution(Distribution):
         self.dist = dist_to_truncate
         self.lower_bound = lower_bound
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Discrete distribution
 
@@ -884,7 +884,7 @@ class RawEmpirical(Distribution):
         self.values = np.asarray(values)
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample from the raw empirical data with replacement
 
@@ -974,7 +974,7 @@ class PearsonV(Distribution):
             msg = "Cannot directly compute var when alpha <= 2.0"
             raise ValueError(msg)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample from the PearsonV distribution
 
@@ -987,7 +987,7 @@ class PearsonV(Distribution):
         return 1 / self.rng.gamma(self.alpha, 1 / self.beta, size)
 
 
-class PearsonVI:
+class PearsonVI(Distribution):
     """
     The PearsonVI(alpha1, alpha2, beta) is an inverted beta distribution.
 
@@ -1070,7 +1070,7 @@ class PearsonVI:
             msg = "Cannot directly compute var when alpha2 <= 2.0"
             raise ValueError(msg)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample from the PearsonVI distribution
 
@@ -1085,15 +1085,13 @@ class PearsonVI:
         return self.beta * X / (1 - X)
 
 
-from typing import Optional
-
 class ErlangK(Distribution):
     """
     Erlang distribution where k and theta are specified.
 
     The Erlang is a special case of the gamma distribution where
     k is a positive integer.  Internally this is implemented using
-    numpy Generators gamma method. 
+    numpy Generators gamma method.
 
     Optionally a user can offet the original of the distribution
     using the location parameter.
@@ -1127,13 +1125,13 @@ class ErlangK(Distribution):
         """
         if k < 0.0:
             raise ValueError("k must be > 0")
-        
+
         self.k = k
         self.theta = theta
         self.location = location
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Erlang distribution
 
@@ -1144,6 +1142,7 @@ class ErlangK(Distribution):
             numpy array returned.
         """
         return self.rng.gamma(self.k, self.theta, size) + self.location
+
 
 class Poisson(Distribution):
     """
@@ -1156,8 +1155,9 @@ class Poisson(Distribution):
     --------
     [1]  Law (2007 pg. 308) Simulation modelling and analysis.
     """
+
     def __init__(self, rate: float, random_seed: Optional[int] = None):
-        '''
+        """
         Poisson Distribution
 
         Params:
@@ -1168,11 +1168,11 @@ class Poisson(Distribution):
         random_seed, int, optional (default=None)
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
-        '''
+        """
         self.rate = rate
         self.rng = np.random.default_rng(random_seed)
 
-    def sample(self, size: Optional[int] = None):
+    def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
         Sample fron the Erlang distribution
 
