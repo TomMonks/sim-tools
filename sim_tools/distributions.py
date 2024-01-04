@@ -1,7 +1,12 @@
 """
-Convenient packaging of distributions for simulation.
+Convenient encapsulation of distributions 
+and sampling from distributions not directly 
+available in scipy or numpy. 
 
-Each distribution has its own random number stream.
+Useful for simulation.
+
+Each distribution has its own random number stream
+that can be set by a seed.
 
 """
 
