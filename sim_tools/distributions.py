@@ -377,10 +377,10 @@ class ContinuousEmpirical(Distribution):
             sample is created.
 
         """
+        super().__init__(random_seed)
         self.lower_bounds = np.asarray(lower_bounds)
         self.upper_bounds = np.asarray(upper_bounds)
         self.cumulative_probs = self.create_cumulative_probs(freq)
-        self.rng = np.random.default_rng(random_seed)
 
     def create_cumulative_probs(self, freq: npt.ArrayLike) -> npt.NDArray[float]:
         """
@@ -488,10 +488,10 @@ class Erlang(Distribution):
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
         """
+        super().__init__(random_seed)
         self.mean = mean
         self.stdev = stdev
         self.location = location
-        self.rng = np.random.default_rng(random_seed)
 
         # k also referred to as shape
         self.k = round((mean / stdev) ** 2)
@@ -566,9 +566,9 @@ class Weibull(Distribution):
         if alpha <= 0 or beta <= 0:
             raise ValueError("alpha and beta must be > 0")
 
+        super().__init__(random_seed)
         self.shape = alpha
         self.scale = beta
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -624,10 +624,10 @@ class Gamma(Distribution):
         if alpha <= 0 or beta <= 0:
             raise ValueError("alpha and beta must be > 0")
 
+        super().__init__(random_seed)
         self.alpha = alpha  # shape
         self.beta = beta  # scale
         self.location = location
-        self.rng = np.random.default_rng(random_seed)
 
     def mean(self) -> float:
         """
@@ -733,11 +733,11 @@ class Beta(Distribution):
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
         """
+        super().__init__(random_seed)
         self.alpha1 = alpha1
         self.alpha2 = alpha2
         self.min = lower_bound
         self.max = upper_bound
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -791,10 +791,10 @@ class Discrete(Distribution):
         if len(values) != len(freq):
             raise ValueError("values and freq arguments must be of equal length")
 
+        super().__init__(random_seed)
         self.values = np.asarray(values)
         self.freq = np.asarray(freq)
         self.probabilities = self.freq / self.freq.sum()
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -881,8 +881,8 @@ class RawEmpirical(Distribution):
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
         """
+        super().__init__(random_seed)
         self.values = np.asarray(values)
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -946,9 +946,10 @@ class PearsonV(Distribution):
         """
         if alpha <= 0 or beta <= 0:
             raise ValueError("alpha and beta must be > 0")
+
+        super().__init__(random_seed)
         self.alpha = alpha  # shape
         self.beta = beta  # scale
-        self.rng = np.random.default_rng(random_seed)
 
     def mean(self) -> float:
         """
@@ -1045,10 +1046,10 @@ class PearsonVI(Distribution):
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
         """
+        super().__init__(random_seed)
         self.alpha1 = alpha1
         self.alpha2 = alpha2
         self.beta = beta
-        self.rng = np.random.default_rng(random_seed)
 
     def mean(self) -> float:
         if self.alpha2 > 1.0:
@@ -1126,10 +1127,10 @@ class ErlangK(Distribution):
         if k < 0.0:
             raise ValueError("k must be > 0")
 
+        super().__init__(random_seed)
         self.k = k
         self.theta = theta
         self.location = location
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -1169,8 +1170,9 @@ class Poisson(Distribution):
             A random seed to reproduce samples. If set to none then a unique
             sample is created.
         """
+
+        super().__init__(random_seed)
         self.rate = rate
-        self.rng = np.random.default_rng(random_seed)
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
