@@ -813,7 +813,7 @@ class Discrete(Distribution):
             Number of samples to return. If integer then
             numpy array returned.
         """
-        return self.rng.choice(self.values, p=self.probabilities, size=size)
+        return self.rng.choice(self.values, p=self.probabilities, size=size).item()
 
 
 class TruncatedDistribution(Distribution):
