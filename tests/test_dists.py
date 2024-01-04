@@ -46,3 +46,49 @@ def test_combination():
     sample = d.sample()
     assert type(sample) == float
 
+def test_erlang():
+    d = dists.Erlang(10.0, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_erlangk():
+    d = dists.ErlangK(1, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_gamma():
+    d = dists.Gamma(1.2, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_weibull():
+    d = dists.Weibull(1.2, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_beta():
+    d = dists.Beta(1.2, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_pearsonv():
+    d = dists.PearsonV(1.2, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_pearsonvi():
+    d = dists.PearsonVI(1.2, 1.2, 2.8, random_seed=SEED_1)
+    assert type(d.sample()) == float
+
+def test_continuous_empirical():
+    dist = dists.ContinuousEmpirical(
+        lower_bounds=[0, 5, 10, 15, 30, 45, 60, 120, 180, 240, 480],
+        upper_bounds=[5, 10, 15, 30, 45, 60, 120, 180, 240, 480, 2880],
+        freq=[34, 4, 8, 13, 15, 13, 19, 13, 9,  12, 73],
+        random_seed=SEED_1)
+    assert type(dist.sample()) == float
+
+def test_continous_empirical_length():
+    dist = dists.ContinuousEmpirical(
+        lower_bounds=[0, 5, 10, 15, 30, 45, 60, 120, 180, 240, 480],
+        upper_bounds=[5, 10, 15, 30, 45, 60, 120, 180, 240, 480, 2880],
+        freq=[34, 4, 8, 13, 15, 13, 19, 13, 9,  12, 73],
+        random_seed=SEED_1)
+    expected_size = 10
+
+    assert len(dist.sample(expected_size)) == expected_size
+

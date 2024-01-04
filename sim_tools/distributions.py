@@ -402,8 +402,8 @@ class ContinuousEmpirical(Distribution):
         np.ndarray
             Cumulative relative frequency.
         """
-        freq = np.asarray(freq)
-        return np.cumsum(freq / freq.sum())
+        freq = np.asarray(freq, dtype='float')
+        return np.cumsum(freq / freq.sum(), dtype='float')
 
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
         """
@@ -438,7 +438,9 @@ class ContinuousEmpirical(Distribution):
             samples.append(continuous_value)
 
         if size == 1:
-            return samples[0]
+            # .item() ensure returned as python 'float' 
+            # as opposed to np.float64
+            return samples[0].item()
         else:
             return np.asarray(samples)
 
