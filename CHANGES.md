@@ -18,7 +18,7 @@
     * ContinuousEmpirical (linear interpolation between groups)
     * RawEmpirical (resample with replacement from individual X's)
     * TruncatedDistribution (arbitrary truncation of any distribution)
-
+* Updated test suite for distributions
 
 
 
