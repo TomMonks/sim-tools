@@ -1,10 +1,9 @@
 # book settings
-title: Python for health data science.
+title: sim-tools docs
 author: Thomas Monks
 email: t.m.w.monks@exeter.ac.uk
 description: >- # this means to ignore newlines until "baseurl:"
-  Learning materials for Coding for Machine Learning and Data Science.
-logo: content/imgs/small_logo.png
+  sim-tools documentation
 #logo: content/imgs/logo_v1.png
 
 # only build files specified in table of contents file
@@ -15,7 +14,7 @@ execute:
   timeout: -1 #no time restriction on notebook execution
   
 repository:
-  url: https://github.com/health-data-science-OR/coding-for-ml
+  url: https://github.com/TomMonks/sim-tools
   branch: main
   
 html:
