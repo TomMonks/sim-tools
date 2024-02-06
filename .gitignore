@@ -1,3 +1,6 @@
+# jupyter-book build folder for docs
+docs/_build/*
+
 # vscode
 .vscode/
 
