@@ -3,6 +3,7 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/TomMonks/sim-tools/HEAD)
 [![DOI](https://zenodo.org/badge/225608065.svg)](https://zenodo.org/badge/latestdoi/225608065)
 [![PyPI version fury.io](https://badge.fury.io/py/sim-tools.svg)](https://pypi.python.org/pypi/sim-tools/)
+[![Read the Docs](https://readthedocs.org/projects/pip/badge/?version=latest)](https://tommonks.github.io/sim-tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-360+/)
 [![License: MIT](https://img.shields.io/badge/ORCID-0000--0003--2631--4481-brightgreen)](https://orcid.org/0000-0003-2631-4481)
@@ -19,11 +20,13 @@ sim-tools is being developed to support simulation education and applied simulat
 
 1. Implementation of classic optimisation via Simulation procedures such as KN, KN++, OBCA and OBCA-m
 2. Distributions module that includes classes that encapsulate a random number stream, seed, and distribution parameters.
+3. Implementation of Thinning to sample from Non-stationary poisson processes in a discrete-event simulation
 
-## Two simple ways to explore sim-tools
+## Three simple ways to explore sim-tools
 
 1. `pip install sim-tools`
 2. Click on the launch-binder at the top of this readme. This will open example Jupyter notebooks in the cloud via Binder.
+3. Oneline documentation: https://tommonks.github.io/sim-tools
 
 ## Citation
 
@@ -42,7 +45,7 @@ If you use sim0tools for research, a practical report, education or any reason p
 }
 ```
 
-# Examples
+# Online Tutorials
 
 * Optimisation Via Simulation [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/TomMonks/sim-tools/blob/master/examples/sw21_tutorial.ipynb)
 
