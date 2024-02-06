@@ -3,7 +3,7 @@
 ## v0.3.0
 
 * Distributions classes now have python type hints.
-* Added distributions example notebook.
+* Added distributions and time dependent arrivals via thinning example notebooks.
 * Added `datasets` module and function to load example NSPP dataset.
 * Distributions added
     * Erlang (mean and stdev parameters)
@@ -18,7 +18,8 @@
     * ContinuousEmpirical (linear interpolation between groups)
     * RawEmpirical (resample with replacement from individual X's)
     * TruncatedDistribution (arbitrary truncation of any distribution)
-* Updated test suite for distributions
+* Added sim_tools.time_dependent module that contains `NSPPThinning` class for modelling time dependent arrival processes.
+* Updated test suite for distributions and thinning
 
 
 
