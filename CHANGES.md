@@ -1,6 +1,10 @@
 # Change log
 
-## v0.3.0
+## v0.3.3
+
+* PATCH: `distributions.Discrete` was not returning numpy arrays.
+
+## v0.3.2
 
 * Distributions classes now have python type hints.
 * Added distributions and time dependent arrivals via thinning example notebooks.
