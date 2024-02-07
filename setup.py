@@ -1,8 +1,8 @@
 import setuptools
 
-# patch ed - build error due to imporing numpy into __init__
+# patched - build error due to imporing numpy into __init__
 # from sim_tools import __version__
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 
 
 # Read in the requirements.txt file
