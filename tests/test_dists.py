@@ -123,10 +123,10 @@ def test_discrete():
     assert type(d.sample()) == int
 
 
-def test_discrete():
-    d = dists.Discrete(values=[1, 2, 3], freq=[95, 3, 2], random_seed=SEED_1)
-    assert type(d.sample()) == int
 
+def test_discrete_multiple():
+    d = dists.Discrete(values=[1, 2, 3], freq=[95, 3, 2], random_seed=SEED_1)
+    assert len(d.sample(size=100)) == 100
 
 def test_truncated_type():
     d1 = dists.Normal(10, 1, random_seed=SEED_1)
