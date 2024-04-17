@@ -1,5 +1,10 @@
 # Change log
 
+## v0.4.0
+
+* BUILD: Dropped legacy `setuptools` and migrated package build to `hatch`
+* BUILD: Removed `setup.py`, `requirements.txt` and `MANIFEST` in favour of `pyproject.toml`
+
 ## v0.3.3
 
 * PATCH: `distributions.Discrete` was not returning numpy arrays.
@@ -25,8 +30,6 @@
 * Added sim_tools.time_dependent module that contains `NSPPThinning` class for modelling time dependent arrival processes.
 * Updated test suite for distributions and thinning
 * Basic Jupyterbook of documentation.
-
-
 
 ## v0.2.0
 
