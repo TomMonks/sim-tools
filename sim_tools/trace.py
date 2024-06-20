@@ -1,5 +1,6 @@
 """
-Define 
+Simple functionality aiming to enhanced a users a
+ability to trace and debug simulation models.
 """
 
 from abc import ABC
@@ -10,7 +11,7 @@ CONFIG_ERROR = ("Your trace has not been initialised. "
                 "or omit debug for default of no trace.")
 
 
-## single rich console
+## single rich console - module level.
 _console = Console()
 
 class Traceable(ABC):
@@ -23,7 +24,7 @@ class Traceable(ABC):
     super().__init__(debug=True) in their __init__() method to 
     initialise trace.
     
-    Subclasses inherit 
+    Subclasses inherit the following methods:
 
     trace() - use this function print out a traceable event
 
