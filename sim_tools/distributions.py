@@ -169,70 +169,66 @@ class Lognormal(Distribution):
 
 
 class Normal(Distribution):
-    """
+    '''
     Convenience class for the normal distribution.
     packages up distribution parameters, seed and random generator.
 
-    Option to prevent negative samples by resampling
-
-    """
-
+    Use the minimum parameter to truncate the distribution
+    '''
     def __init__(
         self,
         mean: float,
         sigma: float,
-        allow_neg: Optional[bool] = True,
+        minimum: Optional[float] = None,
         random_seed: Optional[int] = None,
     ):
-        """
+        '''
         Constructor
-
+        
         Params:
         ------
         mean: float
             The mean of the normal distribution
-
+            
         sigma: float
             The stdev of the normal distribution
 
-        allow_neg: bool, optional (default=True)
-            False = resample on negative values
-            True = negative samples allowed.
-
+        minimum: float
+            Truncate the normal distribution to a minimum 
+            value.
+        
         random_seed: int, optional (default=None)
             A random seed to reproduce samples.  If set to none then a unique
             sample is created.
-        """
-        super().__init__(random_seed)
+        '''
+        self.rng = np.random.default_rng(seed=random_seed)
         self.mean = mean
         self.sigma = sigma
-        self.allow_neg = allow_neg
-
+        self.minimum = minimum
+        
     def sample(self, size: Optional[int] = None) -> float | np.ndarray:
-        """
+        '''
         Generate a sample from the normal distribution
-
+        
         Params:
         -------
         size: int, optional (default=None)
             the number of samples to return.  If size=None then a single
             sample is returned.
-        """
-        # initial sample
+        '''
         samples = self.rng.normal(self.mean, self.sigma, size=size)
 
-        # no need to check if neg allowed.
-        if self.allow_neg:
+        if self.minimum is None:
+            return samples
+        elif size is None:
+            return max(self.minimum, samples)
+        else:
+            # index of samples with negative value
+            neg_idx = np.where(samples < 0)[0]
+            samples[neg_idx] = self.minimum
             return samples
 
-        # repeatedly resample negative values
-        negs = np.where(samples < 0)[0]
-        while len(negs) > 0:
-            resample = self.rng.normal(self.mean, self.sigma, size=len(negs))
-            samples[negs] = resample
-            negs = np.where(samples < 0)[0]
 
-        return samples
 
 
 class Uniform(Distribution):
