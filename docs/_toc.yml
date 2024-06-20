@@ -5,6 +5,9 @@ parts:
   chapters:
   - file: 01_sampling/01_distributions_examples
   - file: 01_sampling/02_time_dependent_examples
+- caption: Debugging
+  chapters:
+  - file: 03_trace/01_model
 - caption: Optimisation
   chapters:
   - file: 02_ovs/03_sw21_tutorial
