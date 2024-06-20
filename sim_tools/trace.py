@@ -4,7 +4,9 @@ ability to trace and debug simulation models.
 """
 
 from abc import ABC
-from rich import Console
+from rich.console import Console
+
+DEFAULT_DEBUG = False
 
 CONFIG_ERROR = ("Your trace has not been initialised. " 
                 "Call super__init__(debug=True) in class initialiser" 
@@ -31,7 +33,7 @@ class Traceable(ABC):
     _trace_config(): use this function to return a dict containing
     the trace configuration for the class.
     '''
-    def __init__(self, debug=False):
+    def __init__(self, debug=DEFAULT_DEBUG):
         self.debug = debug
         self._config = self._default_config()
     
