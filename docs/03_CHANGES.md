@@ -1,5 +1,12 @@
 # Change log
 
+## v0.4.0
+
+### Changes
+
+* BUILD: Dropped legacy `setuptools` and migrated package build to `hatch`
+* BUILD: Removed `setup.py`, `requirements.txt` and `MANIFEST` in favour of `pyproject.toml`
+
 ## v0.3.0
 
 * Distributions classes now have python type hints.
