@@ -9,6 +9,7 @@
 ### Fixed
 
 * DIST: fix to `NSPPThinning` sampling to pre-calcualte mean IAT to ensure that correct exponential mean is used.
+* DIST: normal distribution allows minimum value and truncates automaticalled instead of resampling.
 
 ## v0.4.0
 
