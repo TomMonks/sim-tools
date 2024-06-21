@@ -25,6 +25,10 @@ module: warm-up
 * MSER- 5
 
 
+module: trace
+* enhanced trace functions and classes.
+
+
 module: results visualisation
 ** Standard ways to compare scenarios?
 
@@ -52,3 +56,7 @@ module: distributions
 
 * Empirical
 * NSPP via thinning
+
+## v0.5.0
+
+Enhanced trace functionality

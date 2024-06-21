@@ -58,6 +58,7 @@ class NSPPThinning:
         self.arr_rng = np.random.default_rng(random_seed1)
         self.thinning_rng = np.random.default_rng(random_seed2)
         self.lambda_max = data["arrival_rate"].max()
+        self.min_iat = data["mean_iat"].min()
         # assumes all other intervals are equal in length.
         self.interval = int(data.iloc[1]["t"] - data.iloc[0]["t"])
         self.rejects_last_sample = None
@@ -94,7 +95,7 @@ class NSPPThinning:
             # reject samples if u >= lambda_t / lambda_max
             while u >= (lambda_t / self.lambda_max):
                 self.rejects_last_sample += 1
-                interarrival_time += self.arr_rng.exponential(1 / self.lambda_max)
+                interarrival_time += self.arr_rng.exponential(self.min_iat)
                 u = self.thinning_rng.uniform(0.0, 1.0)
 
             return interarrival_time
