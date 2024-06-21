@@ -1,5 +1,15 @@
 # Change log
 
+## v0.5.0
+
+### Added
+
+* EXPERIMENTAL: added `trace` module with `Traceable` class for colour coding output from different processes and tracking individual patients.
+
+### Fixed
+
+* DIST: fix to `NSPPThinning` sampling to pre-calcualte mean IAT to ensure that correct exponential mean is used.
+
 ## v0.4.0
 
 * BUILD: Dropped legacy `setuptools` and migrated package build to `hatch`
