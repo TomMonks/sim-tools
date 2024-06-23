@@ -4,9 +4,10 @@ Classes and functions to support time dependent samplingm in DES models.
 
 import itertools
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-from typing import Optional
-
+from typing import Optional, Tuple
 
 class NSPPThinning:
     """
@@ -99,3 +100,156 @@ class NSPPThinning:
                 u = self.thinning_rng.uniform(0.0, 1.0)
 
             return interarrival_time
+
+
+def _generate_nspp_samples(arrival_profile: pd.DataFrame, 
+                           run_length: Optional[float] = None, 
+                           n_reps: Optional[int] = 1000) -> pd.DataFrame:
+    """
+    Generate a pandas dataframe that contains multiple replications of
+    a non-stationary poisson process for the set arrival profile. 
+
+    This uses the sim-tools NSPPThinning class.
+
+    Useful for validating the the NSPP has been set up correctly and is producing the 
+    desired profile for the simulation model.
+
+    On each replication the function counts the number of arrivals during the intervals
+    from the arrival profile.  Returns a data frame with reps (rows) and interval arrivals
+    (columns)
+    
+    Parameters:
+    -----------
+    arrival_profile: pandas.DataFrame
+        The arrival profile is a pandas data frame containing 't', 'arrival_rate' and
+        'mean_iat' columns. 
+
+    run_length: float, optional (default=None)
+        How long should the simulation be run. If none then uses the last value in 't'
+        + the interval (assumes equal width intervals) 
+
+    n_reps: int, optional (default=1000)
+        The number of replications to run.
+
+    Returns:
+    --------
+    pd.DataFrame.
+    
+
+    """
+    # replication results
+    replication_results = []
+
+    # multiple replications
+    for rep in range(n_reps):
+
+        # method for producing n non-overlapping streams
+        seed_sequence = np.random.SeedSequence(rep)
+    
+        # Generate n high quality child seeds
+        seeds = seed_sequence.spawn(2)
+        
+        # create nspp
+        nspp_rng = NSPPThinning(arrival_profile, seeds[0], seeds[1])
+
+        # if no run length has been set....
+        if run_length is None:
+            run_length = arrival_profile['t'].iloc[len(arrival_profile)-1] + nspp_rng.interval
+
+        # list - each item is an interval in the arrival profile
+        interval_samples = [0] * arrival_profile.shape[0]
+        simulation_time = 0.0
+        while simulation_time < run_length:
+            iat = nspp_rng.sample(simulation_time)
+            simulation_time += iat
+
+            # data collection: add one to count for hour of the day
+            # note list NSPPThinning this assume equal intervals
+            interval_of_day = int(simulation_time // nspp_rng.interval) % arrival_profile.shape[0]
+            interval_samples[interval_of_day] += 1
+
+        replication_results.append(interval_samples)
+
+   
+    # produce summary chart of arrivals per interval
+    # format in a dataframe
+    df_replications = pd.DataFrame(replication_results)
+    df_replications.index = np.arange(1, len(df_replications)+1)
+    df_replications.index.name = 'rep'
+
+    return df_replications
+
+
+def visualise_nspp_via_thinning(arrival_profile: pd.DataFrame, 
+                                run_length: Optional[float] = None, 
+                                n_reps: Optional[int] = 1000) -> Tuple[plt.Figure, plt.Axes]:
+    """Generate a matplotlib chart to visualise a non-stationary poisson process
+    for the set arrival profile.
+
+    This uses the sim-tools NSPPThinning class.
+
+    Useful for validating the the NSPP has been set up correctly and is producing the 
+    desired profile for the simulation model.
+
+    Parameters:
+    ----------
+    arrival_profile: pandas.DataFrame
+        The arrival profile is a pandas data frame containing 't', 'arrival_rate' and
+        'mean_iat' columns. 
+
+    run_length: float, optional (default=None)
+        How long should the simulation be run. If none then uses the last value in 't'
+        + the interval (assumes equal width intervals) 
+
+    n_reps: int, optional (default=1000)
+        The number of replications to run.
+    """
+    
+    # verification of arrival_profile
+
+    # is it a dataframe
+    if not isinstance(arrival_profile, pd.DataFrame):
+        raise ValueError(f"arrival_profile expected pd.DataFrame "
+                         f"got {type(arrival_profile)}")
+
+    # all columns are present
+    required_columns = ['t', 'arrival_rate', 'mean_iat']
+    for col in required_columns:
+        if col not in arrival_profile.columns:
+            raise ValueError(f"arrival_profile must contain "
+                            f"the following columns: {required_columns}. ")
+    
+
+    
+    # generate the sample data
+    df_interval_results = _generate_nspp_samples(arrival_profile, run_length, n_reps)
+
+    interval_means = df_interval_results.mean(axis=0)
+    interval_sd = df_interval_results.std(axis=0) 
+
+    upper = interval_means + interval_sd
+    lower = interval_means - interval_sd
+    lower[lower < 0] = 0
+
+    # visualise
+    fig = plt.figure(figsize=(12,3))
+    ax = fig.add_subplot()
+
+    # chart x ticks
+    x_values = np.arange(0, arrival_profile.shape[0])
+
+    # plot in this case returns a 2D line plot object
+    _ = ax.plot(arrival_profile['t'], interval_means, label="Mean")
+    _ = ax.fill_between(arrival_profile['t'], lower, upper, alpha=0.2, label='+-1SD')
+
+    # chart appearance
+    _ = ax.legend(loc="best", ncol=3)
+    _ = ax.set_ylim(0,)
+    _ = ax.set_xlim(0, arrival_profile.shape[0]-1)
+    _ = ax.set_ylabel("arrivals")
+    _ = ax.set_xlabel("interval (from profile)")
+    _ = plt.xticks(arrival_profile['t'])
+
+    return fig, ax
+
+
