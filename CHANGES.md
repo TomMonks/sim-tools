@@ -1,5 +1,11 @@
 # Change log
 
+## v0.6.0
+
+### Added
+
+* Added `visualise_nspp_via_thinning` function to `time_dependent` module.
+
 ## v0.5.0
 
 ### Added
