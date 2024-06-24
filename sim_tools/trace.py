@@ -51,10 +51,10 @@ class Traceable(ABC):
             show trace(True). do not show trace (False)
         """
         self.debug = debug
-        self._config = self._default_config()
+        self._config = Traceable._default_config()
     
     @classmethod
-    def _default_config(self) -> dict:
+    def _default_config(cls) -> dict:
         """Returns a default trace configuration"""
         config = {
             "name":None, 
@@ -65,22 +65,10 @@ class Traceable(ABC):
             "tracked":None
         }
         return config
-        
-    
+            
     def _trace_config(self) -> dict:
-        """
-        get the trace config
-        """
-        config = {
-            "name":None, 
-            "name_colour":"bold blue", 
-            "time_colour":'bold blue', 
-            "time_dp":2,
-            "message_colour":'black',
-            "tracked":None
-        }
-        return config
-    
+        """Overload to return a custom trace configuration"""
+        return Traceable._default_config()
     
     def trace(self, time: float, msg: Optional[str] = None, process_id: Optional[str] = None):
         '''Display a formatted trace of a simulated event.
