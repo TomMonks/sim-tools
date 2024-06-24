@@ -103,7 +103,7 @@ class NSPPThinning:
             return interarrival_time
 
 
-def _generate_nspp_samples(
+def nspp_simulation(
     arrival_profile: pd.DataFrame,
     run_length: Optional[float] = None,
     n_reps: Optional[int] = 1000,
@@ -168,12 +168,14 @@ def _generate_nspp_samples(
             iat = nspp_rng.sample(simulation_time)
             simulation_time += iat
 
-            # data collection: add one to count for hour of the day
-            # note list NSPPThinning this assume equal intervals
-            interval_of_day = (
-                int(simulation_time // nspp_rng.interval) % arrival_profile.shape[0]
-            )
-            interval_samples[interval_of_day] += 1
+
+            if simulation_time < run_length:
+                # data collection: add one to count for hour of the day
+                # note list NSPPThinning this assume equal intervals
+                interval_of_day = (
+                    int(simulation_time // nspp_rng.interval) % len(arrival_profile)
+                )
+                interval_samples[interval_of_day] += 1
 
         replication_results.append(interval_samples)
 
@@ -186,7 +188,7 @@ def _generate_nspp_samples(
     return df_replications
 
 
-def visualise_nspp_via_thinning(
+def nspp_plot(
     arrival_profile: pd.DataFrame,
     run_length: Optional[float] = None,
     n_reps: Optional[int] = 1000,
@@ -231,7 +233,7 @@ def visualise_nspp_via_thinning(
             )
 
     # generate the sample data
-    df_interval_results = _generate_nspp_samples(arrival_profile, run_length, n_reps)
+    df_interval_results = nspp_simulation(arrival_profile, run_length, n_reps)
 
     interval_means = df_interval_results.mean(axis=0)
     interval_sd = df_interval_results.std(axis=0)
