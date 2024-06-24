@@ -18,7 +18,7 @@ CONFIG_ERROR = ("Your trace has not been initialised. "
 _console = Console()
 
 class Traceable(ABC):
-    '''Provides basic trace functionality for a process to subclass
+    '''Provides basic trace functionality for a process to subclass.
     
     Abstract base class Traceable
     
@@ -32,12 +32,28 @@ class Traceable(ABC):
     trace() - use this function print out a traceable event
 
     _trace_config(): use this function to return a dict containing
-    the trace configuration for the class.
+    the trace configuration for the class.  Subclasses should
+    override it to implement custom formatting.
+
+    Notes:
+    -----
+    This class provides the same functionality as the function `trace()`
+    in an object orientated framework.  It in theory means cleaner code
+    as the call to trace requires less parameters.  However, it must
+    be setup correctly.
     '''
     def __init__(self, debug: Optional[bool] = DEFAULT_DEBUG):
+        """Initialise Traceable
+
+        Parameters:
+        ----------
+        debug: bool, Optional (default=False)
+            show trace(True). do not show trace (False)
+        """
         self.debug = debug
         self._config = self._default_config()
     
+    @classmethod
     def _default_config(self) -> dict:
         """Returns a default trace configuration"""
         config = {
@@ -52,6 +68,9 @@ class Traceable(ABC):
         
     
     def _trace_config(self) -> dict:
+        """
+        get the trace config
+        """
         config = {
             "name":None, 
             "name_colour":"bold blue", 
@@ -64,8 +83,21 @@ class Traceable(ABC):
     
     
     def trace(self, time: float, msg: Optional[str] = None, process_id: Optional[str] = None):
-        '''
-        Display a trace of an event
+        '''Display a formatted trace of a simulated event.
+
+        Implemented with the rich library Console() object.
+
+        Parameters:
+        ----------
+        time: float
+            The simulation time
+
+        msg: str, Optional (default=None)
+            Event message to display to user
+
+        process_id: str, Optional (default=None)
+            Display an unique identifer for the trace message 
+
         '''
         
         # did not initialise trace
@@ -96,6 +128,63 @@ class Traceable(ABC):
                 _console.print(out)
 
 
-def trace(time, debug: Optional[bool] = DEFAULT_DEBUG, msg: Optional[str] = None, 
+def trace(time: float, debug: Optional[bool] = DEFAULT_DEBUG, msg: Optional[str] = None, 
           process_id: Optional[str] = None, config: Optional[dict] = None):
-    pass
+    """Display a formatted trace of a simulated event.
+
+    Implemented with the rich library Console() object.
+
+    Parameters:
+    ----------
+    time: float
+        The simulation time
+
+    debug: bool, Optional (default=False)
+        show trace(True). do not show trace (False)
+
+    msg: str, Optional (default=None)
+        Event message to display to user
+
+    process_id: str, Optional (default=None)
+        Display an unique identifer for the trace message 
+
+    config: dict, Optional (default=None)
+        If None then default colouring is applied to a message
+        Options (with corresponding defaults) include:
+
+            "name":None, 
+            "name_colour":"bold blue", 
+            "time_colour":'bold blue', 
+            "time_dp":2,
+            "message_colour":'black',
+            "tracked":None
+
+        Use tracked to only show trace for specific process IDs. 
+        For example if a process are labelled as integers from 
+        1 to n and we wished to track processes 5, 6 and 25. Then we would set
+        tracked = [1, 6, 25]
+
+    """
+
+    # is a default needed
+    if config is None:
+        config = Traceable._default_config()
+
+    # if in debug mode
+    if debug:
+            
+        # conditional logic to limit tracking to specific processes/entities
+        if config['tracked'] is None or process_id in config['tracked']:
+
+            # display and format time stamp
+            out = f"[{config['time_colour']}][{time:.{config['time_dp']}f}]:[/{config['time_colour']}]"
+            
+            # if provided display and format a process ID 
+            if config['name'] is not None and process_id is not None:
+                out += f"[{config['name_colour']}]<{config['name']} {process_id}>: [/{config['name_colour']}]"
+
+            # format traced event message
+            out += f"[{config['message_colour']}]{msg}[/{config['message_colour']}]"
+
+            # print to rich console
+            _console.print(out)
