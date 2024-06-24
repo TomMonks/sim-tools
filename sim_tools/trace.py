@@ -5,6 +5,7 @@ ability to trace and debug simulation models.
 
 from abc import ABC
 from rich.console import Console
+from typing import Optional
 
 DEFAULT_DEBUG = False
 
@@ -33,11 +34,11 @@ class Traceable(ABC):
     _trace_config(): use this function to return a dict containing
     the trace configuration for the class.
     '''
-    def __init__(self, debug=DEFAULT_DEBUG):
+    def __init__(self, debug: Optional[bool] = DEFAULT_DEBUG):
         self.debug = debug
         self._config = self._default_config()
     
-    def _default_config(self):
+    def _default_config(self) -> dict:
         """Returns a default trace configuration"""
         config = {
             "name":None, 
@@ -50,7 +51,7 @@ class Traceable(ABC):
         return config
         
     
-    def _trace_config(self):
+    def _trace_config(self) -> dict:
         config = {
             "name":None, 
             "name_colour":"bold blue", 
@@ -62,11 +63,12 @@ class Traceable(ABC):
         return config
     
     
-    def trace(self, time, msg=None, process_id=None):
+    def trace(self, time: float, msg: Optional[str] = None, process_id: Optional[str] = None):
         '''
         Display a trace of an event
         '''
         
+        # did not initialise trace
         if not hasattr(self, '_config'):
             raise AttributeError(CONFIG_ERROR)
         
@@ -92,4 +94,8 @@ class Traceable(ABC):
 
                 # print to rich console
                 _console.print(out)
-        
+
+
+def trace(time, debug: Optional[bool] = DEFAULT_DEBUG, msg: Optional[str] = None, 
+          process_id: Optional[str] = None, config: Optional[dict] = None):
+    pass

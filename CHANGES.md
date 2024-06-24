@@ -4,7 +4,8 @@
 
 ### Added
 
-* Added `visualise_nspp_via_thinning` function to `time_dependent` module.
+* Added `nspp_plot` and `nspp_simulation` functions to `time_dependent` module.
+* DOCS: added `nspp_plot` and `nspp_simulation` examples to time dependent notebook
 
 ## v0.5.0
 
