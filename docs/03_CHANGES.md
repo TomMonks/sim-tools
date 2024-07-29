@@ -1,13 +1,32 @@
 # Change log
 
-## v0.4.0
+## v0.6.0
 
-### Changes
+### Added
+
+* Added `nspp_plot` and `nspp_simulation` functions to `time_dependent` module.
+
+## v0.5.0
+
+### Added
+
+* EXPERIMENTAL: added `trace` module with `Traceable` class for colour coding output from different processes and tracking individual patients.
+
+### Fixed
+
+* DIST: fix to `NSPPThinning` sampling to pre-calcualte mean IAT to ensure that correct exponential mean is used.
+* DIST: normal distribution allows minimum value and truncates automaticalled instead of resampling.
+
+## v0.4.0
 
 * BUILD: Dropped legacy `setuptools` and migrated package build to `hatch`
 * BUILD: Removed `setup.py`, `requirements.txt` and `MANIFEST` in favour of `pyproject.toml`
 
-## v0.3.0
+## v0.3.3
+
+* PATCH: `distributions.Discrete` was not returning numpy arrays.
+
+## v0.3.2
 
 * Distributions classes now have python type hints.
 * Added distributions and time dependent arrivals via thinning example notebooks.
@@ -28,8 +47,6 @@
 * Added sim_tools.time_dependent module that contains `NSPPThinning` class for modelling time dependent arrival processes.
 * Updated test suite for distributions and thinning
 * Basic Jupyterbook of documentation.
-
-
 
 ## v0.2.0
 
