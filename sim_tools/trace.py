@@ -164,7 +164,7 @@ def trace(time: float, debug: Optional[bool] = DEFAULT_DEBUG, msg: Optional[str]
 
     # if in debug mode
     if debug:
-            
+        
         # conditional logic to limit tracking to specific processes/entities
         if _config['tracked'] is None or identifier in _config['tracked']:
 

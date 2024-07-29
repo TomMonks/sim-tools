@@ -87,7 +87,7 @@ class NSPPThinning:
             lambda_t = self.data["arrival_rate"].iloc[t]
 
             # set to a large number so that at least 1 sample taken!
-            u = np.Inf
+            u = np.inf
 
             # included for audit and tracking purposes.
             self.rejects_last_sample = 0.0
