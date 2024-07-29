@@ -7,6 +7,10 @@
 * Added `nspp_plot` and `nspp_simulation` functions to `time_dependent` module.
 * DOCS: added `nspp_plot` and `nspp_simulation` examples to time dependent notebook
 
+### Fixed
+
+* THINNING: patched compatibility of thinning algorithm to work with numpy >= v2. `np.Inf` -> `np.inf`
+
 ## v0.5.0
 
 ### Added
