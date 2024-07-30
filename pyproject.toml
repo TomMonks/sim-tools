@@ -23,7 +23,7 @@ dependencies = [
     "numpy>=1.18.1",
     "pandas>=2.0.0",
     "scikit-learn>=1.0.0",
-    "scipy>=1.4.1",
+    "rich>=13.7.1"
 ]
 
 [project.urls]
@@ -38,3 +38,6 @@ path = "sim_tools/__init__.py"
 include = [
     "/sim_tools",
 ]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.10", "3.11", "3.12"]

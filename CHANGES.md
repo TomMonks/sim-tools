@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
+
+## v0.6.1
+
+### Fixed
+
+* BUILD: added rich library. 
+
+### Removed
+
+* Scipy Dependency
+
 ## v0.6.0
 
 ### Added
