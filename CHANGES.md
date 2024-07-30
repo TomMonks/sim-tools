@@ -18,7 +18,7 @@ Consistent identifier (represents all versions, resolves to latest): [![DOI](htt
 
 * Scipy Dependency
 
-## v0.6.0
+## [v0.6.0](https://github.com/TomMonks/sim-tools/releases/tag/v0.6.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13122484.svg)](https://doi.org/10.5281/zenodo.13122484)
 
 ### Added
 
