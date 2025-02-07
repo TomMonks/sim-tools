@@ -24,6 +24,8 @@
 1. Implementation of classic Optimisation via Simulation procedures such as KN, KN++, OBCA and OBCA-m
 2. Distributions module that includes classes that encapsulate a random number stream, seed, and distribution parameters.
 3. Implementation of Thinning to sample from Non-stationary poisson processes in a DES.
+4. Automatic selection of the number of replications to run via the Replications Algorithm.
+5. EXPERIMENTAL: model trace functionality to support debugging of simulation models.
 
 ## Installation
 
