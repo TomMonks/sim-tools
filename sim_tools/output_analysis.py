@@ -510,7 +510,7 @@ class ReplicationsAlgorithm:
 
         observer: ReplicationObserver, optional (default=None)
             Include an observer object to track how statistics change as the
-            algorithm runs. For example ReplicationTabuliser to return a table
+            algorithm runs. For example ReplicationTabulizer to return a table
             equivalent to confidence_interval_method.
         """
         self.alpha = alpha

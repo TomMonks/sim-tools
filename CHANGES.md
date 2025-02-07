@@ -12,6 +12,13 @@ Consistent identifier (represents all versions, resolves to latest): [![DOI](htt
 
 ### Added
 
+* `output_analysis` module - focussed at the moment on selecting the number of replications
+* `ReplicationsAlgorithm` that implements the automated approach to selecting the number of replications for a single performance measures.
+*  `ReplicationsAlgorithmModelAdapter` - a `Protocol` to adapt any model to work with with `ReplicationsAlgorithm`
+* `confidence_interval_method` - select the number of replication using the classical confidence interval method
+* `plotly_confidence_interval_method` - visualise the confidence interval method using plotly.
+* `ReplicationObserver` a `Protocol` for observering the replications algorithm 
+*  `ReplicationTabulizer` record replications algorithm in a pandas dataframe. 
 ### Updated
 
 * `sim-tools` dev conda environment now pip installs local python package in editable model.
