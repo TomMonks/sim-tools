@@ -10,7 +10,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 only_build_toc_files: true
 
 execute:
-  execute_notebooks: off #cache output from .ipynb files for faster build
+  execute_notebooks: force #cache output from .ipynb files for faster build
   timeout: -1 #no time restriction on notebook execution
   
 repository:
@@ -27,3 +27,13 @@ launch_buttons:
   colab_url: "https://colab.research.google.com"
   notebook_interface: "jupyterlab"
   thebe: true
+
+parse:
+  myst_enable_extensions:
+    # don't forget to list any other extensions you want enabled,
+    # including those that are enabled by default!
+    - amsmath
+
+sphinx:
+  config:
+    mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
