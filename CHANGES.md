@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
 
-## v0.7.0
+## v0.7.0  
 
 ### Added
 
@@ -25,7 +25,7 @@ Consistent identifier (represents all versions, resolves to latest): [![DOI](htt
 
 * `sim-tools` dev conda environment now pip installs local python package in editable model.
 
-## v0.6.1
+## [v0.6.1](https://github.com/TomMonks/sim-tools/releases/tag/v0.6.1) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13135700.svg)](https://doi.org/10.5281/zenodo.13135700)
 
 ### Fixed
 
