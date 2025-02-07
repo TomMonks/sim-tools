@@ -8,7 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
 
-## v0.6.1
+## v0.7.0  
+
+### Added
+
+* `output_analysis` module - focussed at the moment on selecting the number of replications
+* `ReplicationsAlgorithm` that implements the automated approach to selecting the number of replications for a single performance measures.
+* `ReplicationsAlgorithmModelAdapter` - a `Protocol` to adapt any model to work with with `ReplicationsAlgorithm`
+* `confidence_interval_method` - select the number of replication using the classical confidence interval method
+* `plotly_confidence_interval_method` - visualise the confidence interval method using plotly.
+* `ReplicationObserver` a `Protocol` for observering the replications algorithm 
+*  `ReplicationTabulizer` record replications algorithm in a pandas dataframe. 
+* Documentation for `ReplicationsAlgorithm`
+
+### Updated
+
+* `sim-tools` dev conda environment now pip installs local python package in editable model.
+
+## [v0.6.1](https://github.com/TomMonks/sim-tools/releases/tag/v0.6.1) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13135700.svg)](https://doi.org/10.5281/zenodo.13135700)
 
 ### Fixed
 

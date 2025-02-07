@@ -9,6 +9,9 @@ parts:
   chapters:
   - file: 03_trace/01_simple_trace
   - file: 03_trace/01_model
+- caption: Output Analysis
+  chapters:
+  - file: 04_replications/01_automated_reps
 - caption: Optimisation
   chapters:
   - file: 02_ovs/03_sw21_tutorial

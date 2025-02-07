@@ -23,7 +23,9 @@ dependencies = [
     "numpy>=1.18.1",
     "pandas>=2.0.0",
     "scikit-learn>=1.0.0",
-    "rich>=13.7.1"
+    "rich>=13.7.1",
+    "plotly>=6.0.0"
+
 ]
 
 [project.urls]
@@ -40,4 +42,4 @@ include = [
 ]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.10", "3.11", "3.12"]
+python = ["3.10", "3.11", "3.12", "3.13"]
