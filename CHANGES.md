@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Consistent identifier (represents all versions, resolves to latest): [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4553641.svg)](https://doi.org/10.5281/zenodo.4553641)
 
 
-## v0.7.1 
+## [v0.7.1](https://github.com/TomMonks/sim-tools/releases/tag/v0.7.1)  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14844701.svg)](https://doi.org/10.5281/zenodo.14844701)
 
 ### Fixed
 
