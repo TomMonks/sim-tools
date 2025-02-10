@@ -571,7 +571,7 @@ class ReplicationsAlgorithm:
                     k = 1
 
                     # look ahead loop
-                    while converged and k <= self.look_ahead:
+                    while converged and k <= self._klimit():
                         if self.verbose:
                             print(f"{self.n+k}", end=", ")
 
