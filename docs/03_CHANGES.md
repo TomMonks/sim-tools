@@ -1,6 +1,12 @@
 # Change log
 
-## v0.7.0  
+## [v0.7.1](https://github.com/TomMonks/sim-tools/releases/tag/v0.7.1)  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14844701.svg)](https://doi.org/10.5281/zenodo.14844701)
+
+### Fixed
+
+* Patched `ReplicationsAlgorithm` look ahead will now correctly use `_klimit()` to calculate extra no. replications to run.
+
+## [v0.7.0](https://github.com/TomMonks/sim-tools/releases/tag/v0.7.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14834956.svg)](https://doi.org/10.5281/zenodo.14834956) 
 
 ### Added
 
